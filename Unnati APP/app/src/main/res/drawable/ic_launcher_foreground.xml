@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Subtle Drop Shadow for depth -->
+    <path
+        android:fillColor="#22000000"
+        android:pathData="M34,36 L34,63 C34,74 43,80 54,80 C65,80 74,74 74,63 L74,36 L67,36 L67,62 C67,69 61,73 54,73 C47,73 41,69 41,62 L41,36 Z" />
+
+    <!-- Upward Apex Spark / Delta Arrow (Progress / Unnati Crown) -->
+    <path
+        android:fillColor="#FFF7ED"
+        android:pathData="M54,21 L63,30 L59,34 L54,29 L49,34 L45,30 Z" />
+
+    <!-- Main Architectural 'U' Lettermark (Pure Crisp White) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,34 L34,62 C34,73 43,78 54,78 C65,78 74,73 74,62 L74,34 L67,34 L67,61 C67,67.5 61,71.5 54,71.5 C47,71.5 41,67.5 41,61 L41,34 Z" />
+
+    <!-- Left Voice / Telemetry Wave Bar (Amber Gold) -->
+    <path
+        android:strokeColor="#FED7AA"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M46,62 L46,47" />
+
+    <!-- Center Voice & Foundation Peak Bar (Pure White) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,64 L54,37" />
+
+    <!-- Right Voice / Telemetry Wave Bar (Saffron Glow) -->
+    <path
+        android:strokeColor="#FDBA74"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M62,62 L62,43" />
+
+    <!-- Precision Horizontal Datum / Alignment Dots -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M37.5,33.5 A2,2 0 1,0 37.5,29.5 A2,2 0 1,0 37.5,33.5" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70.5,33.5 A2,2 0 1,0 70.5,29.5 A2,2 0 1,0 70.5,33.5" />
+
+</vector>
+
+

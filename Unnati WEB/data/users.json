@@ -1,0 +1,102 @@
+[
+  {
+    "username": "oil-admin",
+    "password": "password",
+    "role": "admin",
+    "name": "Oil India Admin",
+    "status": "active",
+    "assignedProjects": ["PROJ-1", "PROJ-2", "PROJ-3"],
+    "responsibility": "Planning Lead",
+    "permissions": ["all"]
+  },
+  {
+    "username": "owner-pipeline",
+    "password": "password",
+    "role": "owner",
+    "name": "S. K. Baruah",
+    "status": "active",
+    "assignedProjects": ["PROJ-1"],
+    "responsibility": "Ministry Representative",
+    "permissions": ["view_project", "approve_plan", "download_pdf"]
+  },
+  {
+    "username": "arjun-manager",
+    "password": "password",
+    "role": "manager",
+    "name": "Arjun Dev",
+    "status": "active",
+    "assignedProjects": ["PROJ-1"],
+    "responsibility": "Project Manager",
+    "permissions": ["operational_full"]
+  },
+  {
+    "username": "rahul-hse",
+    "password": "password",
+    "role": "manager",
+    "name": "Rahul Bose",
+    "status": "active",
+    "assignedProjects": ["PROJ-1"],
+    "responsibility": "HSE Manager",
+    "permissions": ["hse_only"]
+  },
+  {
+    "username": "amit-ops",
+    "password": "password",
+    "role": "manager",
+    "name": "Amit Sharma",
+    "status": "active",
+    "assignedProjects": ["PROJ-1"],
+    "responsibility": "Operations Manager",
+    "permissions": ["operations_only"]
+  },
+  {
+    "username": "neha-plan",
+    "password": "password",
+    "role": "manager",
+    "name": "Neha Gohain",
+    "status": "active",
+    "assignedProjects": ["PROJ-1"],
+    "responsibility": "Planning Manager",
+    "permissions": ["planning_only"]
+  },
+  {
+    "username": "priya-manager",
+    "password": "password",
+    "role": "manager",
+    "name": "Priya Sen",
+    "status": "active",
+    "assignedProjects": ["PROJ-2"],
+    "responsibility": "Project Manager",
+    "permissions": ["operational_full"]
+  },
+  {
+    "username": "amit-manager",
+    "password": "password",
+    "role": "manager",
+    "name": "Amit Das",
+    "status": "active",
+    "assignedProjects": ["PROJ-3"],
+    "responsibility": "Project Manager",
+    "permissions": ["operational_full"]
+  },
+  {
+    "username": "field-user-1",
+    "password": "password",
+    "role": "field",
+    "name": "Worker Ramesh",
+    "status": "active",
+    "assignedProjects": ["PROJ-1"],
+    "responsibility": "Civil Operator",
+    "permissions": ["field_submit"]
+  },
+  {
+    "username": "field-user-2",
+    "password": "password",
+    "role": "field",
+    "name": "Welder Bikram",
+    "status": "active",
+    "assignedProjects": ["PROJ-2"],
+    "responsibility": "Mechanical Operator",
+    "permissions": ["field_submit"]
+  }
+]

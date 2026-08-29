@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingest Portal - UNNATI (OIL)</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="app.css?v=2">
+</head>
+<body>
+  <!-- Shared components injected by components.js -->
+  <div class="app-layout" id="app-layout">
+
+    <!-- Main Workspace -->
+    <main class="main-workspace" style="display: flex; flex-direction: column; overflow-y: auto; background: #F8FAFC;">
+
+      <!-- Page Header Bar -->
+      <div style="padding: 20px 32px 16px; border-bottom: 1px solid #E2E8F0; background: #FFFFFF; flex-shrink: 0;">
+        <p style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #94A3B8; margin: 0 0 4px 0;">Data Ingestion</p>
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #1E293B; margin: 0 0 3px 0;">Ingest Unstructured Progress Data</h2>
+            <p style="font-size: 12.5px; color: #64748B; margin: 0;">Upload documents or diaries to extract operational activities and update project memory.</p>
+          </div>
+          <span id="extractionStatus" class="badge" style="font-size: 10px; padding: 5px 12px; border-radius: 20px; font-weight: 600; background: #E2E8F0; color: #475569; flex-shrink: 0; margin-left: 16px;">Active</span>
+        </div>
+      </div>
+
+      <!-- Content Workspace Wrapper -->
+      <div style="padding: 32px 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+
+        <!-- Left Column: Drag & Drop Uploader -->
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 100%; border: 2px dashed #CBD5E1; border-radius: 10px; background: #F8FAFC; padding: 60px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;" onmouseover="this.style.borderColor='#94A3B8'; this.style.background='#F1F5F9';" onmouseout="this.style.borderColor='#CBD5E1'; this.style.background='#F8FAFC';">
+            <!-- Cloud Icon -->
+            <div style="width: 64px; height: 64px; background: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 20px;">
+              <i class="fa-solid fa-cloud-arrow-up" style="color: #64748B; font-size: 26px;"></i>
+            </div>
+            <!-- Heading -->
+            <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: #1E293B; margin: 0 0 8px 0;">Drag and Drop Files Here</h4>
+            <!-- Description -->
+            <p style="font-size: 13px; color: #64748B; margin: 0 0 24px 0; line-height: 1.6; max-width: 360px;">Upload Daily Reports, Excel spreadsheets, or Site Diaries to extract operational activities and update project memory.</p>
+            <!-- Button -->
+            <button style="background: #0A2240; color: #FFFFFF; font-size: 12.5px; font-weight: 600; padding: 10px 22px; border: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.2s;" onmouseover="this.style.background='#16365C';" onmouseout="this.style.background='#0A2240';">
+              <i class="fa-solid fa-folder-open" style="font-size: 12.5px;"></i> Browse Files
+            </button>
+            <!-- Formats label -->
+            <span style="font-size: 11px; color: #94A3B8; margin-top: 24px; display: block;">Supported formats: .xlsx, .csv, .pdf, .docx (Max 50MB)</span>
+          </div>
+        </div>
+
+        <!-- Right Column: Processing Queue -->
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #1E293B; margin: 0 0 20px 0; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px;">Processing Queue</h4>
+
+          <!-- Queue Items -->
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+
+            <!-- Item 1: Completed Excel -->
+            <div style="border: 1px solid #E2E8F0; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+              <div style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fa-solid fa-file-excel" style="color: #10B981; font-size: 15px;"></i>
+                  <span style="font-size: 13px; font-weight: 600; color: #334155;">Daily_Report_24_Aug.xlsx</span>
+                </div>
+                <span style="display: inline-flex; align-items: center; gap: 4px; background: #DCFCE7; color: #10B981; font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
+                  <i class="fa-solid fa-circle-check"></i> Completed
+                </span>
+              </div>
+              <!-- Green divider line -->
+              <div style="height: 3px; background: #10B981; width: 100%;"></div>
+              
+              <!-- Post-Process Summary nested card -->
+              <div style="margin: 14px; padding: 14px 18px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;">
+                <h5 style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px 0;">Post-Process Summary</h5>
+                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12.5px;">
+                  <div style="color: #334155; font-weight: 700;">42 activities detected</div>
+                  <div style="color: #10B981; font-weight: 600;">37 matched successfully</div>
+                  <div style="color: #F59E0B; font-weight: 600;">4 review required</div>
+                  <div style="color: #EF4444; font-weight: 600;">1 unmatched</div>
+                </div>
+                <a href="review.html" style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #D85800; text-decoration: none; margin-top: 12px;">
+                  View Details <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Item 2: Extracting PDF -->
+            <div style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; background: #FFFFFF;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fa-solid fa-file-pdf" style="color: #EF4444; font-size: 15px;"></i>
+                  <span style="font-size: 13px; font-weight: 600; color: #334155;">Site_Diary_Rig_A_23Aug.pdf</span>
+                </div>
+                <span style="display: inline-flex; align-items: center; gap: 4px; background: #EFF6FF; color: #3B82F6; font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
+                  <i class="fa-solid fa-rotate fa-spin"></i> Extracting
+                </span>
+              </div>
+              
+              <!-- Progress indicator -->
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: #64748B; margin-bottom: 6px;">
+                <span>AI Model active</span>
+                <span style="color: #3B82F6;">45%</span>
+              </div>
+              <div style="height: 6px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 3px; overflow: hidden; margin-bottom: 12px;">
+                <div style="height: 100%; background: #3B82F6; width: 45%; border-radius: 3px;"></div>
+              </div>
+              
+              <!-- Milestones -->
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; font-weight: 700; color: #94A3B8;">
+                <span style="color: #3B82F6;">Received</span>
+                <span style="color: #3B82F6;">Extracted</span>
+                <span>Matching</span>
+              </div>
+            </div>
+
+            <!-- Item 3: Queued CSV -->
+            <div style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; background: #FFFFFF; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-file-csv" style="color: #64748B; font-size: 15px;"></i>
+                <span style="font-size: 13px; font-weight: 600; color: #64748B;">Inventory_Log_W34.csv</span>
+              </div>
+              <span style="background: #F1F5F9; color: #64748B; font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
+                Queued
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  
+
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSharedComponents('ingest');
+      updatePendingReviewBadge();
+    });
+
+    const samples = [
+      "2026-09-02:\nGrading team completed clearing of ROW up to Chainage 4.0. Excavation crew commenced trenching for Segment 1 between Ch 0.0 to 1.5. Piping team erected spool 4 and pipeline welding is in progress on mainline segment 1.",
+      "Progress Update:\nField Joint coating completed for Segment 1 today. NDT and Radiography checks on Segment 1 joints finished with zero defects. Welding inspector requested to schedule review.",
+      "Site log 04-Sep:\nTrench excavation for pipeline completed from Ch 0.0 to Ch 2.5. Civil supervisor reports crew starting mobilization for trenching segment 2."
+    ];
+    let sampleIdx = 0;
+
+    function loadSampleText() {
+      document.getElementById("rawReportText").value = samples[sampleIdx];
+      sampleIdx = (sampleIdx + 1) % samples.length;
+    }
+  </script>
+  </div>
+</body>
+</html>
+

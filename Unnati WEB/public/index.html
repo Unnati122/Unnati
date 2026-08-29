@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Unnati (OIL)</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Core Design overrides -->
+  <link rel="stylesheet" href="app.css?v=5">
+</head>
+<body>
+
+  <!-- Shared components: gov banner, header, and sidebar injected by components.js -->
+  <div class="app-layout" id="app-layout">
+
+    <!-- Main Workspace -->
+    <main class="main-workspace">
+      <div class="container-fluid py-4">
+        
+        <!-- Welcome banner -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div style="
+              border-radius: 12px;
+              overflow: hidden;
+              position: relative;
+              background-image: url('pipeline_banner.jpg');
+              background-size: cover;
+              background-position: center 60%;
+              min-height: 130px;
+              display: flex;
+              align-items: center;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            ">
+              <!-- Dark overlay -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,34,64,0.85) 0%, rgba(10,34,64,0.55) 60%, rgba(10,34,64,0.2) 100%); border-radius: 12px;"></div>
+              <!-- Content -->
+              <div style="position: relative; z-index: 1; padding: 28px 32px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                  <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 700; color: #FFFFFF; margin: 0 0 6px 0; letter-spacing: 0.3px;">Project Pipeline Tracking – Segment 1–2</h2>
+                  <p style="font-size: 13px; color: rgba(255,255,255,0.72); margin: 0; line-height: 1.5;">Interactive tracking dashboard linked to master Primavera schedule. Powered by Gemini LLM NLP extraction.</p>
+                </div>
+                <div style="flex-shrink: 0; margin-left: 24px;">
+                  <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-oil-well"></i> OIL INDIA LTD
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row mb-4">
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="kpi-card card h-100 tasks-theme">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-uppercase mb-1">Total L5/L6 Tasks</h6>
+                  <h3 class="mb-0" id="totalTasksCount">0</h3>
+                </div>
+                <div class="kpi-icon">
+                  <i class="fa-solid fa-list-check"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="kpi-card card h-100 progress-theme">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-uppercase mb-1">Project Progress</h6>
+                  <h3 class="mb-0" id="overallProgress">0%</h3>
+                </div>
+                <div class="kpi-icon">
+                  <i class="fa-solid fa-circle-nodes"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="kpi-card card h-100 reviews-theme">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-uppercase mb-1">Pending Reviews</h6>
+                  <h3 class="mb-0" id="pendingReviewsCount">0</h3>
+                </div>
+                <div class="kpi-icon">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="kpi-card card h-100 confidence-theme">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-uppercase mb-1">Avg Confidence Score</h6>
+                  <h3 class="mb-0" id="avgConfidence">0%</h3>
+                </div>
+                <div class="kpi-icon">
+                  <i class="fa-solid fa-shield-halved"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Ingestion Audit Trail (Full Width on Overview Page) -->
+          <!-- Left Column: Ingestion Audit Trail -->
+          <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0 !important;">
+              <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid #F1F5F9 !important;">
+                <h5 class="mb-0 text-dark font-weight-bold" style="font-family: 'Outfit', sans-serif; font-size: 15px; color: #1E293B !important;">
+                  <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Recent Ingestion Audit Trail
+                </h5>
+                <a href="review.html" class="btn btn-link btn-sm text-primary p-0 text-decoration-none font-weight-bold" style="font-size: 12.5px;">View Review Queue</a>
+              </div>
+              <div class="card-body timeline-body" id="timelineContainer" style="padding: 24px 32px;">
+                <!-- Timeline items rendered dynamically -->
+                <div class="text-center py-4 text-muted">
+                  Loading activity logs...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Dashboard Statistics Breakdown -->
+          <div class="col-lg-4 mb-4">
+            
+            <!-- Card 1: Discipline Progress Breakdown -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0 !important; background: #FFFFFF;">
+              <div class="card-header bg-white border-bottom py-3 px-4" style="border-bottom: 1px solid #F1F5F9 !important;">
+                <h5 class="mb-0 text-dark font-weight-bold" style="font-family: 'Outfit', sans-serif; font-size: 15px; color: #1E293B !important;">
+                  <i class="fa-solid fa-chart-pie text-primary me-2"></i>Discipline Breakdown
+                </h5>
+              </div>
+              <div class="card-body" style="padding: 20px 24px;">
+                <!-- Civil -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <span style="font-size: 12px; font-weight: 700; color: #475569;">Civil &amp; Earthworks</span>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--gov-primary);">45%</span>
+                  </div>
+                  <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden;">
+                    <div style="width: 45%; height: 100%; background: var(--gov-primary); border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <!-- Piping -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <span style="font-size: 12px; font-weight: 700; color: #475569;">Piping Fabrication</span>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--gov-primary);">20%</span>
+                  </div>
+                  <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden;">
+                    <div style="width: 20%; height: 100%; background: var(--gov-primary); border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <!-- Mechanical -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <span style="font-size: 12px; font-weight: 700; color: #475569;">Mechanical Erection</span>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--gov-primary);">0%</span>
+                  </div>
+                  <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden;">
+                    <div style="width: 0%; height: 100%; background: var(--gov-primary); border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <!-- HSE -->
+                <div>
+                  <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <span style="font-size: 12px; font-weight: 700; color: #475569;">Quality &amp; HSE Audits</span>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--gov-primary);">80%</span>
+                  </div>
+                  <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden;">
+                    <div style="width: 80%; height: 100%; background: var(--gov-primary); border-radius: 3px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Schedule Links Stats -->
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0 !important; background: #FFFFFF;">
+              <div class="card-header bg-white border-bottom py-3 px-4" style="border-bottom: 1px solid #F1F5F9 !important;">
+                <h5 class="mb-0 text-dark font-weight-bold" style="font-family: 'Outfit', sans-serif; font-size: 15px; color: #1E293B !important;">
+                  <i class="fa-solid fa-square-poll-vertical text-primary me-2"></i>Project Statistics
+                </h5>
+              </div>
+              <div class="card-body" style="padding: 20px 24px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span style="font-size: 12.5px; color: #64748B; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-diagram-project" style="width: 14px;"></i> Total L5/L6 Activities
+                  </span>
+                  <span style="font-size: 13px; font-weight: 700; color: #1E293B;">11</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span style="font-size: 12.5px; color: #64748B; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-link" style="width: 14px;"></i> Automatic Linkings
+                  </span>
+                  <span style="font-size: 13px; font-weight: 700; color: #1E293B;">3</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span style="font-size: 12.5px; color: #64748B; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-bullseye" style="width: 14px;"></i> Accuracy Rate
+                  </span>
+                  <span style="font-size: 13px; font-weight: 700; color: #059669;">98.4%</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span style="font-size: 12.5px; color: #64748B; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrows-rotate" style="width: 14px;"></i> Last Sync
+                  </span>
+                  <span style="font-size: 12.5px; font-weight: 600; color: #64748B;">10 mins ago</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer mt-auto py-3 bg-dark text-white-50 text-center border-top border-secondary">
+        <div class="container">
+          <small>Ministry of Electronics and Information Technology (MeitY) &copy; 2026. Made with UX4G Framework for Government Initiatives.</small>
+        </div>
+      </footer>
+    </main>
+  </div>
+  <!-- Scripts -->
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=6"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSharedComponents('overview');
+      loadDashboard();
+    });
+  </script>
+</body>
+</html>

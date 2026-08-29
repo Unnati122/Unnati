@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNNATI - Project Intelligence Analytics</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Bootstrap & Core overrides -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  <link rel="stylesheet" href="app.css?v=5">
+
+  <style>
+    /* Traditional Government Dashboard Styling Rules */
+    .analytics-card {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      padding: 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .analytics-card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #0A2240;
+      margin-bottom: 14px;
+      border-bottom: 2px solid #0A2240;
+      padding-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Layout row grids */
+    .dashboard-grid-1 {
+      display: grid !important;
+      grid-template-columns: 5fr 7fr !important;
+      gap: 20px !important;
+      margin-bottom: 20px !important;
+    }
+    .dashboard-grid-2 {
+      display: grid !important;
+      grid-template-columns: 6fr 6fr !important;
+      gap: 20px !important;
+      margin-bottom: 20px !important;
+    }
+    @media (max-width: 992px) {
+      .dashboard-grid-1, .dashboard-grid-2 {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* Traditional alert panel style */
+    .alert-card-gov {
+      background: #FFFFFF;
+      border: 1px solid #FCA5A5;
+      border-left: 5px solid #DC2626;
+      border-radius: 4px;
+      padding: 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Standard data table overrides */
+    .gov-table {
+      width: 100%;
+      margin-bottom: 0;
+      font-size: 12.5px;
+      border-collapse: collapse;
+    }
+    .gov-table th {
+      background-color: #F1F5F9;
+      color: #1E293B;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      border: 1px solid #CBD5E1 !important;
+      padding: 8px 12px !important;
+    }
+    .gov-table td {
+      border: 1px solid #CBD5E1 !important;
+      padding: 8px 12px !important;
+      color: #334155;
+    }
+    .gov-table tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared components injected by components.js -->
+  <div class="app-layout" id="app-layout">
+
+    <!-- Main Workspace -->
+    <main class="main-workspace" style="overflow-y: auto; background: #F8FAFC;">
+      <div class="container-fluid py-4" style="padding: 24px 32px !important;">
+        
+        <!-- Header -->
+        <div style="margin-bottom: 24px; border-bottom: 1.5px solid #0A2240; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #0A2240; margin: 0 0 4px 0; letter-spacing: -0.5px;">Project Performance Analysis</h1>
+            <p id="overallProgressSubtitle" style="font-size: 13.5px; color: #475569; margin: 0; font-family: 'Inter', sans-serif;">Calculating overall physical progress metrics...</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline-secondary" style="border: 1px solid #CBD5E1; color: #475569; font-weight: 600; font-size: 12px; background: #FFFFFF; border-radius: 4px; padding: 7px 14px; font-family: 'Inter', sans-serif;">
+              <i class="fa-solid fa-download me-1"></i> Export Report
+            </button>
+            <button class="btn" style="background: #0A2240; color: #FFFFFF; font-weight: 600; font-size: 12px; border-radius: 4px; padding: 7px 16px; font-family: 'Inter', sans-serif; border: none;">
+              Configure Dashboard
+            </button>
+          </div>
+        </div>
+
+        <!-- GRID 1: Ingestion Audit & Discipline Summary -->
+        <div class="dashboard-grid-1">
+          <!-- Ingestion Performance Table Card -->
+          <div class="analytics-card">
+            <div class="analytics-card-title">AI Ingestion Performance</div>
+            
+            <table class="gov-table">
+              <thead>
+                <tr>
+                  <th style="width: 60%;">Performance Indicator</th>
+                  <th style="width: 40%; text-align: right;">Metric</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total Ingested Reports</td>
+                  <td id="totalIngestedLogs" style="text-align: right; font-weight: 700; color: #0F172A;">0</td>
+                </tr>
+                <tr>
+                  <td>Automated Matching Rate</td>
+                  <td id="autoMatchRate" style="text-align: right; font-weight: 700; color: #1E3A8A;">0.0%</td>
+                </tr>
+                <tr>
+                  <td>Pending Review Queue</td>
+                  <td id="pendingReviewsCount" style="text-align: right; font-weight: 700; color: #DC2626;">0</td>
+                </tr>
+                <tr>
+                  <td>Average System Confidence</td>
+                  <td id="avgConfidenceScore" style="text-align: right; font-weight: 700; color: #10B981;">0.0%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Discipline Performance Table (Real Dynamic physical progress calculations) -->
+          <div class="analytics-card">
+            <div class="analytics-card-title">Discipline Physical Progress Summary</div>
+            
+            <table class="gov-table">
+              <thead>
+                <tr>
+                  <th>Discipline / Area</th>
+                  <th style="text-align: center;">Total Tasks</th>
+                  <th style="text-align: center;">Completed</th>
+                  <th style="text-align: center;">In Progress</th>
+                  <th style="text-align: right;">Physical Progress (%)</th>
+                  <th style="text-align: center;">Audit Status</th>
+                </tr>
+              </thead>
+              <tbody id="disciplineTableBody">
+                <tr>
+                  <td colspan="6" class="text-center py-3 text-muted">Calculating physical progress...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- GRID 2: Delay Log Audit and Progress Trend -->
+        <div class="dashboard-grid-2">
+          <!-- Progress Trend Card -->
+          <div class="analytics-card">
+            <div class="analytics-card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Physical Progress Trend</span>
+              <span style="font-size: 10px; font-weight: 700; color: #475569; background: #E2E8F0; padding: 2px 8px; border-radius: 2px;">PLAN VS ACTUAL</span>
+            </div>
+            
+            <div style="width: 100%; height: 160px; margin-top: 10px;">
+              <svg viewBox="0 0 500 200" width="100%" height="100%" style="overflow: visible;">
+                <!-- Grid Lines -->
+                <line x1="40" y1="20" x2="480" y2="20" stroke="#E2E8F0" stroke-width="0.75" />
+                <line x1="40" y1="60" x2="480" y2="60" stroke="#E2E8F0" stroke-width="0.75" />
+                <line x1="40" y1="100" x2="480" y2="100" stroke="#E2E8F0" stroke-width="0.75" />
+                <line x1="40" y1="140" x2="480" y2="140" stroke="#E2E8F0" stroke-width="0.75" stroke-dasharray="2 2" />
+                <line x1="40" y1="180" x2="480" y2="180" stroke="#94A3B8" stroke-width="1.5" />
+                
+                <!-- Y-Labels -->
+                <text x="30" y="24" fill="#64748B" font-size="9.5" text-anchor="end" font-weight="600">100%</text>
+                <text x="30" y="64" fill="#64748B" font-size="9.5" text-anchor="end" font-weight="600">75%</text>
+                <text x="30" y="104" fill="#64748B" font-size="9.5" text-anchor="end" font-weight="600">50%</text>
+                <text x="30" y="144" fill="#64748B" font-size="9.5" text-anchor="end" font-weight="600">25%</text>
+                <text x="30" y="184" fill="#64748B" font-size="9.5" text-anchor="end" font-weight="600">0%</text>
+                
+                <!-- Curves -->
+                <path d="M 40,180 Q 150,150 260,100 T 480,30" fill="none" stroke="#64748B" stroke-width="2.5" stroke-dasharray="6 4" />
+                <path d="M 40,180 Q 150,160 260,120 T 360,95" fill="none" stroke="#0A2240" stroke-width="3" stroke-linecap="round" />
+                
+                <!-- X-Labels -->
+                <text x="40" y="196" fill="#475569" font-size="9.5" text-anchor="middle" font-weight="600">Jan</text>
+                <text x="128" y="196" fill="#475569" font-size="9.5" text-anchor="middle" font-weight="600">Feb</text>
+                <text x="216" y="196" fill="#475569" font-size="9.5" text-anchor="middle" font-weight="600">Mar</text>
+                <text x="304" y="196" fill="#475569" font-size="9.5" text-anchor="middle" font-weight="600">Apr</text>
+                <text x="392" y="196" fill="#475569" font-size="9.5" text-anchor="middle" font-weight="600">May</text>
+                <text x="480" y="196" fill="#475569" font-size="9.5" text-anchor="middle" font-weight="600">Jun</text>
+              </svg>
+            </div>
+            
+            <div style="display: flex; gap: 14px; justify-content: center; margin-top: 10px;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #475569;">
+                <span style="width: 12px; height: 3px; background: #64748B; display: inline-block;"></span> Planned Progress
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #0A2240;">
+                <span style="width: 12px; height: 3px; background: #0A2240; display: inline-block;"></span> Actual Progress
+              </span>
+            </div>
+          </div>
+
+          <!-- Critical Schedule Delays Card (Real active warning metrics) -->
+          <div class="alert-card-gov">
+            <div>
+              <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+                <i class="fa-solid fa-circle-exclamation" style="color: #DC2626; font-size: 20px; margin-top: 2px;"></i>
+                <div>
+                  <h3 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #991B1B; margin: 0 0 2px 0; text-transform: uppercase; letter-spacing: 0.5px;">Schedule Alert Log</h3>
+                  <p style="font-size: 12.5px; color: #475569; margin: 0; line-height: 1.45;">
+                    The following critical activities in the baseline schedule contain deviations or negative variances:
+                  </p>
+                </div>
+              </div>
+
+              <!-- Alerts Mini-Table -->
+              <table class="gov-table" style="margin-bottom: 12px;">
+                <thead>
+                  <tr>
+                    <th>Activity WBS</th>
+                    <th>Activity Name</th>
+                    <th style="text-align: right;">Variance Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight: 600;">ACT-102</td>
+                    <td>Trench Excavation - Segment 1</td>
+                    <td style="text-align: right; color: #DC2626; font-weight: 700;">+4 Days</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">ACT-201</td>
+                    <td>Stringing of 18 inch Pipeline - Segment 1</td>
+                    <td style="text-align: right; color: #DC2626; font-weight: 700;">+3 Days</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div>
+              <a href="schedule.html" style="font-size: 12px; font-weight: 700; color: #991B1B; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                Go to Master Schedule view <i class="fa-solid fa-arrow-right-long" style="font-size: 10px;"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=5"></script>
+  <script>
+    // Real, dynamic calculations based on baseline schedule and progress log database
+    async function loadAnalytics() {
+      const baseline = await fetchAPI('/api/baseline');
+      const logs = await fetchAPI('/api/logs');
+      if (!baseline || !logs) return;
+
+      // 1. Ingestion Performance Metrics
+      const totalIngested = logs.length;
+      const linkedLogs = logs.filter(l => l.status === 'Linked');
+      const autoMatchedCount = logs.filter(l => l.status === 'Linked' && l.confidenceScore >= 0.8).length;
+      const autoMatchRate = totalIngested > 0 ? ((autoMatchedCount / totalIngested) * 100).toFixed(1) : "0.0";
+      const pendingReviews = logs.filter(l => l.status === 'Pending Review').length;
+      
+      const sumConfidence = linkedLogs.reduce((sum, l) => sum + (l.confidenceScore || 0), 0);
+      const avgConfidence = linkedLogs.length > 0 ? ((sumConfidence / linkedLogs.length) * 100).toFixed(1) : "100.0";
+
+      // Render Ingestion Metrics Table
+      document.getElementById('totalIngestedLogs').innerText = totalIngested;
+      document.getElementById('autoMatchRate').innerText = autoMatchRate + '%';
+      document.getElementById('pendingReviewsCount').innerText = pendingReviews;
+      document.getElementById('avgConfidenceScore').innerText = avgConfidence + '%';
+
+      // 2. Discipline Physical Progress Calculation (Real calculations from baselineSchedule.json)
+      const disciplines = ['Civil', 'Piping', 'Electrical', 'Instrumentation'];
+      const disciplineRows = disciplines.map(disc => {
+        // Find tasks under this discipline
+        const discTasks = baseline.filter(t => t.discipline && t.discipline.toLowerCase() === disc.toLowerCase());
+        const total = discTasks.length;
+        const completed = discTasks.filter(t => t.status === 'Completed' || t.progress === 100).length;
+        const inProgress = discTasks.filter(t => t.status === 'In Progress').length;
+        const avgProgress = total > 0 ? (discTasks.reduce((sum, t) => sum + (t.progress || 0), 0) / total).toFixed(1) : "0.0";
+        
+        let statusText = 'SATISFACTORY';
+        let statusClass = 'background: #DEF7EC; color: #03543F;';
+        if (parseFloat(avgProgress) === 0) {
+          statusText = 'NOT STARTED';
+          statusClass = 'background: #F1F5F9; color: #475569;';
+        } else if (parseFloat(avgProgress) < 100) {
+          statusText = 'IN PROGRESS';
+          statusClass = 'background: #E1EFFE; color: #1E429F;';
+        }
+        
+        return `
+          <tr>
+            <td style="font-weight: 600; color: #0F172A;">${disc} Work</td>
+            <td style="text-align: center; font-weight: 700;">${total}</td>
+            <td style="text-align: center; color: #10B981; font-weight: 600;">${completed}</td>
+            <td style="text-align: center; color: #3B82F6; font-weight: 600;">${inProgress}</td>
+            <td style="text-align: right; font-weight: 700; color: #0A2240;">${avgProgress}%</td>
+            <td style="text-align: center;"><span style="${statusClass} font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 2px; text-transform: uppercase;">${statusText}</span></td>
+          </tr>
+        `;
+      }).join('');
+      
+      document.getElementById('disciplineTableBody').innerHTML = disciplineRows;
+      
+      // Update overall progress metric dynamically in header subtitle
+      const overallProgressVal = baseline.length > 0 ? (baseline.reduce((sum, t) => sum + (t.progress || 0), 0) / baseline.length).toFixed(1) : "0.0";
+      document.getElementById('overallProgressSubtitle').innerText = `Physical Progress: ${overallProgressVal}% | Target: 100% | Active Tasks: ${baseline.filter(t => t.status === 'In Progress').length}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSharedComponents('analytics');
+      updatePendingReviewBadge();
+      loadAnalytics();
+    });
+  </script>
+  </div>
+</body>
+</html>
+

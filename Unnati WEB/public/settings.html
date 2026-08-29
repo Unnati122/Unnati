@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings - UNNATI (OIL)</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Core Design overrides -->
+  <link rel="stylesheet" href="app.css?v=6">
+  
+  <style>
+    .settings-card {
+      border: 1px solid #E2E8F0 !important;
+      border-radius: 12px;
+      background: #FFFFFF;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+    .settings-card-header {
+      background: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 16px 24px;
+    }
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .form-control, .form-select {
+      font-size: 13px;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      padding: 6px 12px;
+      color: #1E293B;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--gov-primary);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout" id="app-layout">
+    <!-- Main Workspace -->
+    <main class="main-workspace" style="overflow-y: auto;">
+      <div style="padding: 28px 32px;">
+        
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: #1E293B; margin: 0 0 4px 0;">System Settings &amp; Governance</h2>
+            <p style="font-size: 12.5px; color: #64748B; margin: 0;">Manage project managers, operational roles, and platform parameters.</p>
+          </div>
+        </div>
+
+        <div class="row">
+          
+          <!-- LEFT COLUMN: Managers List -->
+          <div class="col-lg-7">
+            <div class="card settings-card">
+              <div class="settings-card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark font-weight-bold" style="font-size: 14.5px; font-family: 'Outfit', sans-serif;">
+                  <i class="fa-solid fa-users-gear text-primary me-2"></i>Project Managers Registry
+                </h5>
+                <span class="badge bg-light text-dark border font-size-11" id="activeProjectLabel">Project: Loading...</span>
+              </div>
+              <div class="card-body p-4">
+                <p style="font-size:12.5px; color:#64748B; margin-bottom:18px;">Below is the registry of managers assigned to the selected project. Changes synchronize instantly to the backend user database.</p>
+                
+                <div class="table-responsive">
+                  <table class="table table-bordered table-sm align-middle" id="managersTable">
+                    <thead class="bg-light">
+                      <tr style="font-size:11.5px; font-weight:700; color:#475569;">
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Responsibility</th>
+                        <th>Permissions</th>
+                        <th>Status</th>
+                        <th style="width:100px;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody style="font-size:12.5px;">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD: Administrative Reset -->
+            <div class="card settings-card" style="border-color:#FCA5A5 !important;">
+              <div class="settings-card-header bg-danger bg-opacity-10" style="border-bottom-color:#FECACA;">
+                <h5 class="mb-0 text-danger font-weight-bold" style="font-size: 14.5px; font-family: 'Outfit', sans-serif;">
+                  <i class="fa-solid fa-triangle-exclamation me-2"></i>Danger Zone - Administrative Reset
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <p style="font-size:13px; color:#475569;">Clicking the reset button below will format the local JSON database files, purging all active progress diaries, chat logs, and baseline changes, resetting everything back to the default project seeds.</p>
+                <button class="btn btn-danger font-weight-bold" onclick="resetDatabase()" style="font-size:12.5px; padding:8px 16px; background:#DC2626;">
+                  <i class="fa-solid fa-rotate-left me-1.5"></i>Reset System to Seeds
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Add/Edit Manager Form -->
+          <div class="col-lg-5">
+            <div class="card settings-card">
+              <div class="settings-card-header">
+                <h5 class="mb-0 text-dark font-weight-bold" style="font-size: 14.5px; font-family: 'Outfit', sans-serif;" id="formTitle">
+                  <i class="fa-solid fa-user-plus text-primary me-2"></i>Add Project Manager
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <form id="managerForm" onsubmit="saveManager(event)">
+                  <input type="hidden" id="editMode" value="false">
+
+                  <div class="mb-3">
+                    <label class="form-label" for="mUsername">Username</label>
+                    <input type="text" class="form-control" id="mUsername" placeholder="e.g. rahul-hse" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="mPassword">Password</label>
+                    <input type="password" class="form-control" id="mPassword" placeholder="Enter new password (optional if editing)">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="mName">Full Name</label>
+                    <input type="text" class="form-control" id="mName" placeholder="e.g. Rahul Bose" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="mResponsibility">Responsibility</label>
+                    <select class="form-select" id="mResponsibility" onchange="suggestPermissions(this.value)">
+                      <option value="Project Manager">Project Manager (Full Scope)</option>
+                      <option value="HSE Manager">HSE Manager (Safety Scopes)</option>
+                      <option value="Operations Manager">Operations Manager (Civil/Mech Spools)</option>
+                      <option value="Planning Manager">Planning Manager (Timeline/Planner)</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Scope / Permissions</label>
+                    <select class="form-select" id="mPermissions">
+                      <option value="operational_full">Full Project Operational Access</option>
+                      <option value="hse_only">Safety/HSE Tasks &amp; Review Queue Only</option>
+                      <option value="operations_only">Operations/Civil/Mech Logs Only</option>
+                      <option value="planning_only">Planning, Milestones &amp; Timelines Only</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Project Assignments</label>
+                    <div class="border rounded p-3 d-flex flex-column gap-2" style="background:#F8FAFC;">
+                      <div class="form-check">
+                        <input class="form-check-input proj-check" type="checkbox" value="PROJ-1" id="chkProj1" checked>
+                        <label class="form-check-label font-size-13" for="chkProj1">Pipeline Construction Segment 1</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input proj-check" type="checkbox" value="PROJ-2" id="chkProj2">
+                        <label class="form-check-label font-size-13" for="chkProj2">Digboi Infrastructure Expansion</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input proj-check" type="checkbox" value="PROJ-3" id="chkProj3">
+                        <label class="form-check-label font-size-13" for="chkProj3">Numaligarh Bio-Refinery Development</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-4">
+                    <label class="form-label" for="mStatus">Account Status</label>
+                    <select class="form-select" id="mStatus">
+                      <option value="active" selected>Active</option>
+                      <option value="inactive">Inactive / Suspended</option>
+                    </select>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 font-weight-bold" style="background:var(--gov-primary); border:none;">
+                      <i class="fa-solid fa-floppy-disk me-1.5"></i>Save Manager
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary w-100 font-weight-bold" id="cancelBtn" onclick="resetForm()" style="display:none;">
+                      Cancel Edit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=6"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure only Admin can access this page
+      const role = localStorage.getItem('userRole');
+      if (role !== 'admin') {
+        alert('Access Denied: Only Administrators can access System settings.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      renderSharedComponents('settings');
+      updatePendingReviewBadge();
+      
+      const pId = localStorage.getItem('selectedProjectId') || 'PROJ-1';
+      document.getElementById('activeProjectLabel').innerText = `Active Project: ${pId}`;
+      
+      loadManagers(pId);
+    });
+
+    // Sync with the global project selector change in header
+    window.addEventListener('projectChanged', (e) => {
+      const pId = e.detail.projectId;
+      document.getElementById('activeProjectLabel').innerText = `Active Project: ${pId}`;
+      loadManagers(pId);
+    });
+
+    async function loadManagers(projectId) {
+      const managers = await fetchAPI('/api/admin/managers');
+      const tbody = document.querySelector('#managersTable tbody');
+      if (!tbody) return;
+
+      if (!managers || managers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">No managers configured.</td></tr>';
+        return;
+      }
+
+      // Filter managers that belong to the active project context (unless ALL is selected)
+      const filtered = managers.filter(m => projectId === 'ALL' || m.assignedProjects.includes(projectId));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">No managers assigned to this project.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(m => {
+        const permLabel = m.permissions.includes('all') ? 'Full Admin' : 
+                          m.permissions.includes('operational_full') ? 'Full Operational' :
+                          m.permissions.includes('hse_only') ? 'Safety/HSE' :
+                          m.permissions.includes('operations_only') ? 'Operations' : 'Planning';
+        return `
+          <tr>
+            <td style="font-weight:600; color:#475569;">${m.username}</td>
+            <td>${m.name}</td>
+            <td><span class="badge bg-light text-dark border">${m.responsibility}</span></td>
+            <td>${permLabel}</td>
+            <td>
+              <span class="badge bg-${m.status==='active'?'success':'danger'}">
+                ${m.status}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-outline-primary px-2" onclick="editManager('${m.username}', '${m.name}', '${m.responsibility}', '${m.status}', '${m.permissions[0]}', ${JSON.stringify(m.assignedProjects)})">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteManager('${m.username}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function suggestPermissions(resp) {
+      const permSelect = document.getElementById('mPermissions');
+      if (resp === 'Project Manager') {
+        permSelect.value = 'operational_full';
+      } else if (resp === 'HSE Manager') {
+        permSelect.value = 'hse_only';
+      } else if (resp === 'Operations Manager') {
+        permSelect.value = 'operations_only';
+      } else if (resp === 'Planning Manager') {
+        permSelect.value = 'planning_only';
+      }
+    }
+
+    function editManager(username, name, responsibility, status, perm, assigned) {
+      document.getElementById('editMode').value = "true";
+      document.getElementById('mUsername').value = username;
+      document.getElementById('mUsername').readOnly = true;
+      document.getElementById('mName').value = name;
+      document.getElementById('mResponsibility').value = responsibility;
+      document.getElementById('mPermissions').value = perm || 'operational_full';
+      document.getElementById('mStatus').value = status;
+      document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-pen text-primary me-2"></i>Modify Manager';
+      document.getElementById('cancelBtn').style.display = 'block';
+
+      // Setup checkboxes
+      const checks = document.querySelectorAll('.proj-check');
+      checks.forEach(chk => {
+        chk.checked = assigned.includes(chk.value);
+      });
+    }
+
+    function resetForm() {
+      document.getElementById('editMode').value = "false";
+      document.getElementById('mUsername').value = '';
+      document.getElementById('mUsername').readOnly = false;
+      document.getElementById('mName').value = '';
+      document.getElementById('mPassword').value = '';
+      document.getElementById('mResponsibility').value = 'Project Manager';
+      document.getElementById('mPermissions').value = 'operational_full';
+      document.getElementById('mStatus').value = 'active';
+      document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-plus text-primary me-2"></i>Add Project Manager';
+      document.getElementById('cancelBtn').style.display = 'none';
+      
+      const checks = document.querySelectorAll('.proj-check');
+      checks.forEach(chk => {
+        chk.checked = chk.value === 'PROJ-1';
+      });
+    }
+
+    async function saveManager(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('mUsername').value;
+      const name = document.getElementById('mName').value;
+      const password = document.getElementById('mPassword').value;
+      const responsibility = document.getElementById('mResponsibility').value;
+      const permission = document.getElementById('mPermissions').value;
+      const status = document.getElementById('mStatus').value;
+
+      // Project checkbox array
+      const assignedProjects = [];
+      document.querySelectorAll('.proj-check:checked').forEach(chk => {
+        assignedProjects.push(chk.value);
+      });
+
+      const body = {
+        username,
+        name,
+        responsibility,
+        assignedProjects,
+        permissions: [permission],
+        status
+      };
+      if (password) body.password = password;
+
+      const result = await fetchAPI('/api/admin/managers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (result && result.success) {
+        alert(result.message || 'Saved manager configurations successfully.');
+        resetForm();
+        const pId = localStorage.getItem('selectedProjectId') || 'PROJ-1';
+        loadManagers(pId);
+      }
+    }
+
+    async function deleteManager(username) {
+      if (!confirm(`Are you sure you want to remove manager "${username}" from the database?`)) {
+        return;
+      }
+
+      const result = await fetchAPI('/api/admin/managers', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+
+      if (result && result.success) {
+        alert(result.message || 'Removed manager successfully.');
+        const pId = localStorage.getItem('selectedProjectId') || 'PROJ-1';
+        loadManagers(pId);
+      }
+    }
+
+    async function resetDatabase() {
+      if (!confirm('Warning: This will format the active Primavera schedule and progress timeline, restoring the default seeded data for all projects. Proceed?')) {
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      try {
+        const response = await fetch('/api/reset', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert('Databases successfully reset to baseline seeds.');
+          window.location.reload();
+        } else {
+          alert('Failed to reset: ' + data.error);
+        }
+      } catch (err) {
+        alert('Server connection error.');
+      }
+    }
+  </script>
+</body>
+</html>
+

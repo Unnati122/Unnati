@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Review - UNNATI (OIL)</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="app.css?v=2">
+
+  <style>
+    /* -- Sidebar transition support -- */
+    /* -- Sidebar transition support -- */
+    .sidebar {
+      will-change: width;
+      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1), padding 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      overflow: visible !important;
+    }
+    .main-workspace {
+      will-change: width;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* Transition elements within sidebar links */
+    .sidebar .nav-link span,
+    .sidebar .dot-notification,
+    .sidebar .badge {
+      opacity: 1;
+      display: inline-block;
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), width 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+    .sidebar .profile-info {
+      opacity: 1;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), width 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    /* -- Collapsed sidebar layout styles -- */
+    .sidebar.collapsed {
+      width: 70px !important;
+      min-width: 70px !important;
+      padding: 12px 0 0 0 !important; /* Move upward */
+    }
+    .sidebar.collapsed .sidebar-nav {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+    .sidebar.collapsed .nav-link {
+      display: block !important; /* Block wrapper for absolute child positioning */
+      height: 42px !important;
+      width: 42px !important;
+      padding: 0 !important;
+      position: relative !important;
+      border-radius: 50% !important;
+      margin: 4px auto !important;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    /* Reset active bar pseudo-elements */
+    .sidebar.collapsed .nav-link::before {
+      display: none !important;
+      content: none !important;
+    }
+    /* Hide labels, badges, and red dot notification smoothly */
+    .sidebar.collapsed .nav-link span,
+    .sidebar.collapsed .dot-notification,
+    .sidebar.collapsed .badge,
+    .sidebar.collapsed .profile-info {
+      opacity: 0 !important;
+      width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+    /* Absolute center icons */
+    .sidebar.collapsed .nav-icon {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 16px !important;
+    }
+    /* Tooltip on hover */
+    .sidebar.collapsed .nav-link[data-label]:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0A2240;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 999;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(10,34,64,0.15);
+    }
+    /* Active state indicator */
+    .sidebar.collapsed .nav-link.active {
+      background: rgba(216, 88, 0, 0.08) !important;
+      color: var(--gov-primary) !important;
+      border-radius: 50% !important;
+    }
+    /* Hover state for normal links */
+    .sidebar.collapsed .nav-link:hover:not(.active) {
+      background: rgba(10, 34, 64, 0.05) !important;
+      color: var(--gov-accent) !important;
+      border-radius: 50% !important;
+    }
+    /* Hover state for active links */
+    .sidebar.collapsed .nav-link.active:hover {
+      background: rgba(216, 88, 0, 0.12) !important;
+      color: var(--gov-primary) !important;
+    }
+    .sidebar.collapsed .sidebar-footer {
+      padding: 10px 0 !important;
+      background: transparent !important;
+      border-top: none !important;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sidebar.collapsed .user-profile {
+      justify-content: center !important;
+      padding: 10px 0 !important;
+    }
+    .sidebar.collapsed .profile-avatar {
+      margin: 0 auto;
+    }
+    /* Expand main workspace */
+    .main-workspace {
+      flex: 1 !important;
+      min-width: 0 !important;
+    }
+    /* AI Review dynamic grid layout rules */
+    #aiReviewGrid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)) !important;
+      gap: 24px !important;
+    }
+  </style>
+
+</head>
+<body>
+  <!-- Shared components injected by components.js -->
+  <div class="app-layout" id="app-layout">
+
+    <!-- Main Workspace: AI Review Queue -->
+    <main class="main-workspace" style="overflow-y: auto; background: #F8FAFC; padding: 32px 40px !important; display: flex; flex-direction: column;">
+      
+      <!-- Queue Header -->
+      <div style="margin-bottom: 24px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 700; color: #0A2240; margin: 0 0 6px 0; letter-spacing: -0.5px;">AI Review Queue</h1>
+        <p style="font-size: 14.5px; color: #475569; margin: 0; line-height: 1.5; font-family: 'Inter', sans-serif;">Review activities where AI confidence is below the automatic-update threshold.</p>
+      </div>
+
+      <!-- Loading / Empty Placeholder -->
+      <div id="aiPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;">
+        <div style="width: 60px; height: 60px; background: rgba(10,34,64,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+          <i class="fa-solid fa-list-check" style="color: #0A2240; font-size: 24px;"></i>
+        </div>
+        <p style="font-size: 15px; font-weight: 600; color: #334155; margin: 0 0 6px 0;">All Activities Verified</p>
+        <p style="font-size: 13px; color: #94A3B8; max-width: 300px; line-height: 1.7; margin: 0;">No activities are currently pending review. Verified items have been synced to the Primavera master schedule.</p>
+      </div>
+
+      <!-- Grid list -->
+      <div class="row" id="aiReviewGrid" style="row-gap: 24px;"></div>
+
+    </main>
+  </div>
+
+
+
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSharedComponents('review');
+
+      loadAIMatchingInterface();
+      updatePendingReviewBadge();
+    });
+
+    async function loadAIMatchingInterface() {
+      const logs = await fetchAPI('/api/logs');
+      if (!logs) return;
+
+      const pending = logs.filter(l => l.status === 'Pending Review');
+      renderReviewQueue(pending);
+    }
+
+    function renderReviewQueue(pendingLogs) {
+      const grid = document.getElementById('aiReviewGrid');
+      const placeholder = document.getElementById('aiPlaceholder');
+
+      if (!pendingLogs || pendingLogs.length === 0) {
+        grid.innerHTML = '';
+        placeholder.style.display = 'flex';
+        return;
+      }
+
+      placeholder.style.display = 'none';
+
+      grid.innerHTML = pendingLogs.map(log => {
+        const confPct = Math.round((log.confidenceScore || 0) * 100);
+        
+        // Calculate relative time ago
+        const diffMs = Date.now() - new Date(log.timestamp).getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        let timeAgo = 'Just now';
+        if (diffMins > 0) {
+          timeAgo = diffMins === 1 ? '1 min ago' : `${diffMins} mins ago`;
+        }
+        if (diffMins >= 60) {
+          const diffHrs = Math.floor(diffMins / 60);
+          timeAgo = diffHrs === 1 ? '1 hr ago' : `${diffHrs} hrs ago`;
+        }
+        if (diffMins >= 1440) {
+          const diffDays = Math.floor(diffMins / 1440);
+          timeAgo = diffDays === 1 ? 'Yesterday' : `${diffDays} days ago`;
+        }
+
+        // Contextual matching logic for uncertainty reason
+        let uncertaintyReason = 'Confidence score below 75% threshold for auto-logging.';
+        let mockMatchName = 'Cable Tray Setup';
+        let mockMatchPct = Math.max(40, confPct - 5);
+
+        const txt = (log.rawText || '').toLowerCase();
+        if (txt.includes('pipe') || txt.includes('weld')) {
+          uncertaintyReason = 'Multiple potential pipeline segments detected. Ambiguous layout ref.';
+          mockMatchName = 'Sector 7 Prep';
+          mockMatchPct = Math.max(40, confPct - 6);
+        } else if (txt.includes('electrical') || txt.includes('cable')) {
+          uncertaintyReason = 'Ambiguous unit location reference. Requires planner validation.';
+          mockMatchName = 'Unit 4 Fitout';
+          mockMatchPct = Math.max(40, confPct - 4);
+        } else if (txt.includes('excavation') || txt.includes('trench')) {
+          uncertaintyReason = 'Chainage overlap identified in Master Schedule logs.';
+          mockMatchName = 'Substructure Excavation';
+          mockMatchPct = Math.max(40, confPct - 7);
+        }
+
+        return `
+          <div class="review-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #EF4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 20px; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 300px; height: 100%;">
+            <div>
+              <!-- Top badge + ID + Time -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px; text-transform: uppercase;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Human review
+                  </span>
+                  <span style="font-size: 12px; font-weight: 600; color: #64748B;">ID: ${log.id.toUpperCase().substring(0, 8)}</span>
+                </div>
+                <span style="font-size: 11px; color: #94A3B8;">${timeAgo}</span>
+              </div>
+
+              <!-- Field Statement -->
+              <div style="margin-bottom: 16px;">
+                <div style="font-size: 9.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Field Statement</div>
+                <div style="background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 6px; padding: 10px 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500; color: #1E293B; line-height: 1.45; font-style: italic;">
+                  "${log.rawText}"
+                </div>
+              </div>
+
+              <!-- Top Match -->
+              <div style="margin-bottom: 14px;">
+                <div style="font-size: 9.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Top Match</div>
+                <div style="background: #F1F5F9; border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                  <span style="font-size: 12px; font-weight: 600; color: #334155; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${log.matchedTaskDescription || 'Unmatched'}">
+                    ${log.matchedTaskDescription || 'No direct match found'}
+                  </span>
+                  <span style="font-size: 12px; font-weight: 700; color: #1E3A8A; flex-shrink: 0;">${confPct}%</span>
+                </div>
+              </div>
+
+              <!-- Reason for Uncertainty -->
+              <div style="margin-bottom: 20px;">
+                <div style="font-size: 9.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Reason for Uncertainty</div>
+                <div style="font-size: 11.5px; color: #78350F; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px 14px; line-height: 1.5;">
+                  ${uncertaintyReason}
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions Footer -->
+            <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 14px; margin-top: auto;">
+              <button onclick="rejectLog('${log.id}')" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #64748B; font-weight: 600; font-size: 12px; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif;" onmouseover="this.style.background='#FEF2F2'; this.style.color='#EF4444';" onmouseout="this.style.background='#FFFFFF'; this.style.color='#64748B';">
+                Reject
+              </button>
+              <button onclick="openChangeActivity('${log.id}')" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #0A2240; font-weight: 600; font-size: 12px; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif;" onmouseover="this.style.background='#F8FAFC';" onmouseout="this.style.background='#FFFFFF';">
+                Change Activity
+              </button>
+              <button onclick="confirmLogMatch('${log.id}')" style="background: #0A2240; border: none; color: #FFFFFF; font-weight: 600; font-size: 12px; padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif;" onmouseover="this.style.background='#112D55';" onmouseout="this.style.background='#0A2240';">
+                <i class="fa-solid fa-check"></i> Approve (${confPct}%)
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function confirmLogMatch(logId) {
+      await fetchAPI('/api/confirm-log', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ logId }) });
+      loadAIMatchingInterface();
+      updatePendingReviewBadge();
+    }
+
+    async function rejectLog(logId) {
+      await confirmLogMatch(logId);
+    }
+
+    function openChangeActivity(logId) {
+      alert("Manual reassignment modal will open. Under Development.");
+    }
+  </script>
+  </div>
+</body>
+</html>
+

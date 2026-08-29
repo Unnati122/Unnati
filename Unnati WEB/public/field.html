@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unnati - Field Portal</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --gov-primary: #F97316;
+      --gov-accent: #0A2240;
+    }
+    body {
+      background: #F1F5F9;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #1E293B;
+    }
+    .field-header {
+      background: var(--gov-accent);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .field-header h1 {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .field-container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+    .field-card {
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .field-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 1px solid #F1F5F9;
+      padding-bottom: 10px;
+    }
+    .form-control, .form-select {
+      font-size: 13.5px;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      padding: 8px 12px;
+      color: #1E293B;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--gov-primary);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+    }
+    .btn-field {
+      background: var(--gov-primary);
+      color: white;
+      font-weight: 600;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      width: 100%;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-field:hover {
+      background: #EA580C;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F8FAFC;
+    }
+    .task-item:last-child {
+      border-bottom: none;
+    }
+    .task-item label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+    }
+    .task-status-completed {
+      text-decoration: line-through;
+      color: #94A3B8 !important;
+    }
+    .scanner-btn {
+      background: #F1F5F9;
+      color: #475569;
+      border: 1px dashed #CBD5E1;
+      font-weight: 600;
+      font-size: 12.5px;
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    .scanner-btn:hover {
+      background: #E2E8F0;
+      border-color: #94A3B8;
+    }
+    .log-item {
+      background: #F8FAFC;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #475569;
+      border-left: 3px solid #CBD5E1;
+    }
+    .log-item.linked {
+      border-left-color: #10B981;
+    }
+    .log-item.pending {
+      border-left-color: #F59E0B;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header class="field-header">
+    <div class="d-flex align-items-center gap-2">
+      <img src="oil-india.svg" alt="OIL Logo" style="height: 28px;">
+      <h1>UNNATI <span style="font-size:10px; font-weight:normal; background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px; margin-left:4px;">Field Portal</span></h1>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span style="font-size: 12px; font-weight: 600;" id="profileSpan">Loading...</span>
+      <button class="btn btn-sm btn-outline-light py-1 font-size-11" onclick="logout()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Wrapper -->
+  <div class="field-container">
+
+    <!-- Active Project Details -->
+    <div style="font-size:12px; font-weight:700; color:#F97316; background:#FFF7ED; border:1px solid #FFEDD5; padding:8px 12px; border-radius:6px; margin-bottom:20px; display:flex; align-items:center; gap:6px;">
+      <i class="fa-solid fa-folder-open"></i> Project Assignment: <span id="projectNameSpan">Loading...</span>
+    </div>
+
+    <!-- CARD 1: ASSIGNED TASKS CHECKLIST -->
+    <div class="field-card">
+      <h3><i class="fa-solid fa-clipboard-list text-primary me-2"></i>My Assigned Tasks</h3>
+      <div id="tasksList" class="d-flex flex-column">
+        <div class="text-center py-3 text-muted" style="font-size: 12.5px;">Loading assigned tasks...</div>
+      </div>
+    </div>
+
+    <!-- CARD 2: PROGRESS STATUS DIARY REPORT -->
+    <div class="field-card">
+      <h3><i class="fa-solid fa-pen-nib text-primary me-2"></i>Submit Progress Report</h3>
+      <form onsubmit="submitProgress(event)">
+        <div class="mb-3">
+          <label class="form-label" style="font-size:12px; font-weight:600; color:#475569;">Scan Location QR Code</label>
+          <button type="button" class="scanner-btn" id="scanBtn" onclick="simulateQRScan()">
+            <i class="fa-solid fa-qrcode text-primary"></i> <span id="scanText">Simulate QR Scanner</span>
+          </button>
+          <input type="hidden" id="qrData">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="reportText">Progress Updates / Notes</label>
+          <textarea class="form-control" id="reportText" rows="3" placeholder="Explain works completed, chainages cleared, spools welded..." required></textarea>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-6">
+            <label class="form-label" for="reportDiscipline">Discipline</label>
+            <select class="form-select" id="reportDiscipline">
+              <option value="Civil" selected>Civil</option>
+              <option value="Piping">Piping</option>
+              <option value="Mechanical">Mechanical</option>
+              <option value="Quality/HSE">Quality/HSE</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label" style="font-size:12px;">Attach Photo Update</label>
+            <button type="button" class="scanner-btn" onclick="simulatePhotoUpload()" style="padding: 8px;">
+              <i class="fa-solid fa-camera"></i> <span id="photoText">Add Photo</span>
+            </button>
+            <input type="hidden" id="photoData">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-field mt-2" id="submitBtn">
+          <i class="fa-solid fa-paper-plane me-1.5"></i>Submit Progress Update
+        </button>
+      </form>
+    </div>
+
+    <!-- CARD 3: ISSUE / INCIDENT REPORTING -->
+    <div class="field-card" style="border-color: #FEE2E2 !important; background: #FFFDFD;">
+      <h3 style="color: #DC2626; border-bottom-color: #FEE2E2;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Report Safety or Site Issue</h3>
+      <form onsubmit="submitIssue(event)">
+        <div class="mb-3">
+          <label class="form-label" for="issueText" style="color: #991B1B;">Describe Issue / Safety Hazard</label>
+          <textarea class="form-control" id="issueText" rows="2" placeholder="e.g. Pipeline joint leakage detected at segment 2, or missing scaffolding safety tags..." required></textarea>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-6">
+            <label class="form-label" for="issueType" style="color: #991B1B;">Issue Category</label>
+            <select class="form-select" id="issueType">
+              <option value="Safety Violation" selected>Safety Incident</option>
+              <option value="Equipment Leak">Equipment Issue</option>
+              <option value="Weather Obstruction">Site Delay</option>
+            </select>
+          </div>
+          <div class="col-6" style="display:flex; align-items:flex-end;">
+            <button type="submit" class="btn-field bg-danger" style="background:#DC2626;">
+              <i class="fa-solid fa-circle-exclamation me-1.5"></i>File Alert Ticket
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- CARD 4: RECENT SUBMISSIONS FEED -->
+    <div class="field-card">
+      <h3><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>My Submissions Today</h3>
+      <div id="submissionsFeed" class="d-flex flex-column">
+        <!-- Logs loaded dynamically -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Global Configuration
+    const API_URL = '';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Authenticate
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('userRole');
+      const name = localStorage.getItem('username');
+      
+      if (!token || role !== 'field') {
+        alert('Unauthorized context. Please sign in with field operator account.');
+        logout();
+        return;
+      }
+
+      document.getElementById('profileSpan').innerText = name;
+      
+      // Determine Project details
+      const assignedProjects = JSON.parse(localStorage.getItem('assignedProjects') || '[]');
+      const currentProject = assignedProjects[0] || 'PROJ-1';
+      document.getElementById('projectNameSpan').innerText = currentProject === 'PROJ-1' ? 'Pipeline Construction Segment 1' : 'Digboi Infrastructure Expansion';
+      
+      loadAssignedTasks(currentProject);
+      loadMySubmissions(currentProject);
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    async function loadAssignedTasks(projectId) {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await fetch(`/api/baseline?projectId=${projectId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const tasks = await response.json();
+        const container = document.getElementById('tasksList');
+        
+        if (!response.ok || !tasks || tasks.length === 0) {
+          container.innerHTML = '<div class="text-center py-2 text-muted">No active assignments.</div>';
+          return;
+        }
+
+        // Show tasks list
+        container.innerHTML = tasks.map(t => {
+          const isDone = t.status === 'Completed';
+          return `
+            <div class="task-item">
+              <input type="checkbox" id="chk-${t.id}" ${isDone ? 'checked disabled' : ''} onchange="toggleTaskDone('${t.id}', this)">
+              <label for="chk-${t.id}" class="${isDone ? 'task-status-completed' : ''}">${t.id} - ${t.description}</label>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function toggleTaskDone(taskId, checkbox) {
+      if (!checkbox.checked) return;
+      
+      const token = localStorage.getItem('token');
+      const projectId = JSON.parse(localStorage.getItem('assignedProjects') || '[]')[0] || 'PROJ-1';
+
+      if (!confirm('Mark this task as Completed? This will report progress back to the master schedule.')) {
+        checkbox.checked = false;
+        return;
+      }
+
+      // Submit an ingestion report showing completed status
+      try {
+        const response = await fetch('/api/ingest-text', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            projectId: projectId,
+            rawText: `Completed task ${taskId}. Site operator confirmed full installation.`,
+            source: 'Mobile Field App'
+          })
+        });
+
+        if (response.ok) {
+          alert('Task completion reported successfully!');
+          checkbox.disabled = true;
+          checkbox.nextElementSibling.classList.add('task-status-completed');
+          loadMySubmissions(projectId);
+        } else {
+          checkbox.checked = false;
+          alert('Failed to report completion.');
+        }
+      } catch(e) {
+        checkbox.checked = false;
+      }
+    }
+
+    async function loadMySubmissions(projectId) {
+      const token = localStorage.getItem('token');
+      const name = localStorage.getItem('username');
+      try {
+        const response = await fetch(`/api/logs?projectId=${projectId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const logs = await response.json();
+        const container = document.getElementById('submissionsFeed');
+        
+        if (!response.ok || !logs) return;
+
+        // Filter logs posted by this operator or generic report submissions
+        const filtered = logs.filter(l => l.source === 'Mobile Field App' || l.rawText.includes(name));
+
+        if (filtered.length === 0) {
+          container.innerHTML = '<div class="text-center py-3 text-muted" style="font-size:12px;">No submissions reported today.</div>';
+          return;
+        }
+
+        container.innerHTML = filtered.slice(0, 5).map(l => {
+          const isLinked = l.status === 'Linked';
+          const title = l.extracted && l.extracted.activity ? l.extracted.activity : l.rawText;
+          return `
+            <div class="log-item ${isLinked ? 'linked' : 'pending'}">
+              <div class="d-flex justify-content-between mb-1">
+                <strong>${l.extracted.discipline || 'General'}</strong>
+                <span class="text-muted">${new Date(l.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+              </div>
+              <p style="margin:0;">${title}</p>
+              <div style="font-size:10px; margin-top:4px; font-weight:600; color:${isLinked?'#10B981':'#F59E0B'}">
+                Status: ${l.status}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    function simulateQRScan() {
+      const loc = "Segment 2 Pipeline Sector Node 4 - Ch 2.5-3.0";
+      document.getElementById('qrData').value = loc;
+      document.getElementById('scanText').innerText = `Location: ${loc}`;
+      document.getElementById('scanBtn').style.borderColor = '#10B981';
+      document.getElementById('scanBtn').style.background = '#ECFDF5';
+    }
+
+    function simulatePhotoUpload() {
+      const photo = "IMG_Pipeline_Lowering_Ch2_5.jpg";
+      document.getElementById('photoData').value = photo;
+      document.getElementById('photoText').innerText = photo;
+    }
+
+    async function submitProgress(event) {
+      event.preventDefault();
+      const token = localStorage.getItem('token');
+      const projectId = JSON.parse(localStorage.getItem('assignedProjects') || '[]')[0] || 'PROJ-1';
+
+      const qr = document.getElementById('qrData').value;
+      const notes = document.getElementById('reportText').value;
+      const discipline = document.getElementById('reportDiscipline').value;
+      const photo = document.getElementById('photoData').value;
+
+      let fullReport = `${notes}`;
+      if (qr) fullReport = `[Location QR Scanned: ${qr}] ` + fullReport;
+      if (photo) fullReport = fullReport + ` (Attachment: ${photo})`;
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+      const response = await fetch('/api/ingest-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          projectId: projectId,
+          rawText: fullReport,
+          source: 'Mobile Field App'
+        })
+      });
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1.5"></i>Submit Progress Update';
+
+      if (response.ok) {
+        alert('Daily update report submitted successfully.');
+        document.getElementById('reportText').value = '';
+        document.getElementById('qrData').value = '';
+        document.getElementById('scanText').innerText = 'Simulate QR Scanner';
+        document.getElementById('scanBtn').style.borderColor = '#CBD5E1';
+        document.getElementById('scanBtn').style.background = '#F1F5F9';
+        document.getElementById('photoData').value = '';
+        document.getElementById('photoText').innerText = 'Add Photo';
+        loadMySubmissions(projectId);
+      } else {
+        alert('Failed to submit daily update.');
+      }
+    }
+
+    async function submitIssue(event) {
+      event.preventDefault();
+      const token = localStorage.getItem('token');
+      const projectId = JSON.parse(localStorage.getItem('assignedProjects') || '[]')[0] || 'PROJ-1';
+      
+      const issue = document.getElementById('issueText').value;
+      const category = document.getElementById('issueType').value;
+
+      const response = await fetch('/api/ingest-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          projectId: projectId,
+          rawText: `[CRITICAL SITE ISSUE FILED: ${category}] ${issue}`,
+          source: 'Mobile Field App'
+        })
+      });
+
+      if (response.ok) {
+        alert('Alert ticket logged and sent to Management review queue.');
+        document.getElementById('issueText').value = '';
+        loadMySubmissions(projectId);
+      } else {
+        alert('Failed to submit site alert.');
+      }
+    }
+  </script>
+</body>
+</html>

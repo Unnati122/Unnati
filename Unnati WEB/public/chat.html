@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNNATI Chat - OIL</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="app.css?v=2">
+</head>
+<body>
+  <!-- Shared components injected by components.js -->
+  <div class="app-layout" id="app-layout">
+
+    <!-- Main Workspace -->
+    <main class="main-workspace" style="overflow-y: auto;">
+      <div style="padding: 28px 32px;">
+
+        <!-- Page Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+          <div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: #1E293B; margin: 0 0 4px 0;">Field Updates</h2>
+            <p style="font-size: 12.5px; color: #64748B; margin: 0;">Review and manage recent field reports and AI extractions.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; background: #FFFFFF; border: 1px solid #E2E8F0; padding: 7px 14px; border-radius: 7px; cursor: pointer; font-family: 'Inter', sans-serif;">
+              <i class="fa-regular fa-calendar" style="font-size: 11px;"></i> Last 7 Days <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 2px;"></i>
+            </button>
+            <button style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; background: #FFFFFF; border: 1px solid #E2E8F0; padding: 7px 14px; border-radius: 7px; cursor: pointer; font-family: 'Inter', sans-serif;">
+              <i class="fa-solid fa-sliders" style="font-size: 11px;"></i> Discipline <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 2px;"></i>
+            </button>
+            <button style="display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #FFFFFF; background: var(--gov-accent, #0A2240); border: none; padding: 8px 18px; border-radius: 7px; cursor: pointer; font-family: 'Inter', sans-serif;">
+              <i class="fa-solid fa-download" style="font-size: 11px;"></i> Export
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Stat Cards -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;" id="fieldUpdateStats">
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px 20px;">
+            <div style="font-size: 11px; font-weight: 600; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px;">Auto-linked</div>
+            <div style="font-size: 28px; font-weight: 800; color: #1E293B; margin-bottom: 6px;" id="statLinked">—</div>
+            <div style="font-size: 11px; color: #10B981; font-weight: 600;"><i class="fa-solid fa-arrow-up" style="font-size: 9px;"></i> <span id="statLinkedPct">—</span></div>
+            <div style="height: 3px; background: #DCFCE7; border-radius: 2px; margin-top: 10px;"><div style="height: 3px; background: #10B981; width: 80%; border-radius: 2px;"></div></div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px 20px;">
+            <div style="font-size: 11px; font-weight: 600; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px;">Needs Review</div>
+            <div style="font-size: 28px; font-weight: 800; color: #1E293B; margin-bottom: 6px;" id="statPending">—</div>
+            <div style="font-size: 11px; color: #D85800; font-weight: 600;"><i class="fa-solid fa-arrow-down" style="font-size: 9px;"></i> <span id="statPendingPct">—</span></div>
+            <div style="height: 3px; background: #FFF3EB; border-radius: 2px; margin-top: 10px;"><div style="height: 3px; background: #D85800; width: 55%; border-radius: 2px;"></div></div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px 20px;">
+            <div style="font-size: 11px; font-weight: 600; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px;">Unmatched</div>
+            <div style="font-size: 28px; font-weight: 800; color: #1E293B; margin-bottom: 6px;" id="statUnmatched">—</div>
+            <div style="font-size: 11px; color: #94A3B8; font-weight: 600;">Total Logs: <span id="statTotal">—</span></div>
+            <div style="height: 3px; background: #F1F5F9; border-radius: 2px; margin-top: 10px;"><div style="height: 3px; background: #94A3B8; width: 30%; border-radius: 2px;"></div></div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px 20px;">
+            <div style="font-size: 11px; font-weight: 600; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px;">Rejected</div>
+            <div style="font-size: 28px; font-weight: 800; color: #1E293B; margin-bottom: 6px;" id="statRejected">—</div>
+            <div style="font-size: 11px; color: #94A3B8; font-weight: 600;">Stable</div>
+            <div style="height: 3px; background: #F1F5F9; border-radius: 2px; margin-top: 10px;"><div style="height: 3px; background: #EF4444; width: 10%; border-radius: 2px;"></div></div>
+          </div>
+        </div>
+
+        <!-- Filter Tabs + Table Card -->
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; overflow: hidden; margin-bottom: 24px;">
+
+          <!-- Filter Tab Bar -->
+          <div style="padding: 12px 20px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button onclick="filterLogs('all')" id="tab-all" style="font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid #E2E8F0; background: #0A2240; color: #fff; cursor: pointer; transition: all 0.15s;">All</button>
+              <button onclick="filterLogs('Linked')" id="tab-linked" style="font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #10B981; cursor: pointer; transition: all 0.15s;">
+                <span style="width: 7px; height: 7px; background: #10B981; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>Auto-linked
+              </button>
+              <button onclick="filterLogs('Pending Review')" id="tab-pending" style="font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #D85800; cursor: pointer; transition: all 0.15s;">
+                <span style="width: 7px; height: 7px; background: #D85800; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>Needs Review
+              </button>
+              <button onclick="filterLogs('Rejected')" id="tab-rejected" style="font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #EF4444; cursor: pointer; transition: all 0.15s;">
+                <span style="width: 7px; height: 7px; background: #EF4444; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>Rejected
+              </button>
+            </div>
+            <span style="font-size: 11.5px; color: #64748B;">Showing latest extraction logs</span>
+          </div>
+
+          <!-- Table -->
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+              <thead>
+                <tr style="background: #F8FAFC;">
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; white-space: nowrap;">Source</th>
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; white-space: nowrap;">Timestamp</th>
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; white-space: nowrap;">Supervisor</th>
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; white-space: nowrap;">Discipline</th>
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0;">Extracted Activity</th>
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; white-space: nowrap;">Status</th>
+                  <th style="padding: 10px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0;">Matched Activity</th>
+                  <th style="padding: 10px 16px; text-align: right; font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; white-space: nowrap;">Confidence</th>
+                </tr>
+              </thead>
+              <tbody id="fieldUpdatesTable">
+                <tr>
+                  <td colspan="8" style="text-align: center; padding: 40px; color: #94A3B8; font-size: 13px;">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i> Loading field update logs...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSharedComponents('field-updates');
+      updatePendingReviewBadge();
+      loadFieldUpdates();
+    });
+
+    let allLogs = [];
+
+    async function loadFieldUpdates() {
+      const logs = await fetchAPI('/api/logs');
+      if (!logs) return;
+      allLogs = logs;
+
+      // KPI Stats
+      const linked = logs.filter(l => l.status === 'Linked').length;
+      const pending = logs.filter(l => l.status === 'Pending Review').length;
+      const unmatched = logs.filter(l => !l.matchedTaskId && l.status !== 'Linked' && l.status !== 'Pending Review').length;
+      const rejected = logs.filter(l => l.status === 'Rejected').length;
+      document.getElementById('statLinked').textContent = linked;
+      document.getElementById('statPending').textContent = pending;
+      document.getElementById('statUnmatched').textContent = unmatched;
+      document.getElementById('statRejected').textContent = rejected;
+      document.getElementById('statLinkedPct').textContent = logs.length > 0 ? Math.round((linked / logs.length) * 100) + '% match rate' : '—';
+      document.getElementById('statPendingPct').textContent = logs.length > 0 ? Math.round((pending / logs.length) * 100) + '% pending' : '—';
+      document.getElementById('statTotal').textContent = logs.length;
+
+      renderTable(logs);
+    }
+
+    function filterLogs(status) {
+      // Update active tab style
+      ['all','linked','pending','rejected'].forEach(id => {
+        const el = document.getElementById('tab-' + id);
+        if (el) {
+          el.style.background = '#FFFFFF';
+          el.style.color = id === 'linked' ? '#10B981' : id === 'pending' ? '#D85800' : id === 'rejected' ? '#EF4444' : '#475569';
+        }
+      });
+      const activeId = status === 'all' ? 'all' : status === 'Linked' ? 'linked' : status === 'Rejected' ? 'rejected' : 'pending';
+      const activeEl = document.getElementById('tab-' + activeId);
+      if (activeEl) { activeEl.style.background = '#0A2240'; activeEl.style.color = '#FFFFFF'; }
+
+      const filtered = status === 'all' ? allLogs : allLogs.filter(l => l.status === status);
+      renderTable(filtered);
+    }
+
+    function renderTable(logs) {
+      const tbody = document.getElementById('fieldUpdatesTable');
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#94A3B8; font-size:13px;">No logs found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = logs.map(log => {
+        const isLinked = log.status === 'Linked';
+        const confidencePct = Math.round((log.confidenceScore || 0) * 100);
+        const date = new Date(log.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        const statusColor = isLinked ? '#10B981' : '#D85800';
+        const statusBg = isLinked ? '#DCFCE7' : '#FFF3EB';
+        const confColor = confidencePct >= 75 ? '#10B981' : confidencePct >= 50 ? '#D85800' : '#EF4444';
+        return `
+          <tr style="border-bottom: 1px solid #F1F5F9; transition: background 0.1s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+            <td style="padding: 12px 16px; color: #475569; font-size: 12px; white-space: nowrap;">
+              <i class="fa-solid fa-file-lines" style="color: #94A3B8; margin-right: 6px; font-size: 11px;"></i>${log.source || 'Report'}
+            </td>
+            <td style="padding: 12px 16px; color: #64748B; font-size: 11.5px; white-space: nowrap;">${date}</td>
+            <td style="padding: 12px 16px; color: #334155; font-size: 12px; white-space: nowrap; font-weight: 500;">${log.extracted?.supervisor || log.supervisor || '—'}</td>
+            <td style="padding: 12px 16px; white-space: nowrap;">
+              <span style="font-size: 11px; background: #F1F5F9; color: #475569; padding: 3px 8px; border-radius: 4px; font-weight: 500;">${log.extracted?.discipline || '—'}</span>
+            </td>
+            <td style="padding: 12px 16px; color: #1E293B; font-size: 12.5px; max-width: 260px;">${log.extracted?.activity || log.rawText}</td>
+            <td style="padding: 12px 16px; white-space: nowrap;">
+              <span style="font-size: 11px; background: ${statusBg}; color: ${statusColor}; padding: 3px 10px; border-radius: 12px; font-weight: 600;">${log.extracted?.status || log.status}</span>
+            </td>
+            <td style="padding: 12px 16px; color: ${isLinked ? '#334155' : '#94A3B8'}; font-size: 12px; font-style: ${isLinked ? 'normal' : 'italic'};">
+              ${isLinked ? (log.matchedTaskDescription || log.matchedTaskId || '—') : 'No match found'}
+            </td>
+            <td style="padding: 12px 16px; text-align: right; font-size: 12.5px; font-weight: 700; color: ${confColor}; white-space: nowrap;">${confidencePct}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+
+    // Voice recognition implementation using browser webkitSpeechRecognition API
+    let recognition;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-IN'; // set to Indian English or hindi
+
+      recognition.onstart = function() {
+        document.getElementById("voiceBtn").classList.add("recording");
+        document.getElementById("speechStatus").classList.remove("d-none");
+      };
+
+      recognition.onend = function() {
+        document.getElementById("voiceBtn").classList.remove("recording");
+        document.getElementById("speechStatus").classList.add("d-none");
+      };
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("chatInput").value = transcript;
+      };
+
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error', event.error);
+        document.getElementById("speechStatus").classList.add("d-none");
+      };
+    }
+
+    function toggleVoiceSearch() {
+      if (!recognition) {
+        alert("Web Speech recognition is not supported in this browser. Please type your update.");
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (err) {
+        // Already started
+        recognition.stop();
+      }
+    }
+  </script>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNNATI - Schedule Audit Trail</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Bootstrap & Core overrides -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  <link rel="stylesheet" href="app.css?v=5">
+
+  <style>
+    /* Audit Trail Styling */
+    .audit-card {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .audit-filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .audit-table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }
+    .audit-table th {
+      background-color: #F1F5F9;
+      color: #1E293B;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      letter-spacing: 0.5px;
+      border: 1px solid #CBD5E1;
+      padding: 10px 14px;
+    }
+    .audit-table td {
+      border: 1px solid #CBD5E1;
+      padding: 10px 14px;
+      color: #334155;
+    }
+    .audit-table tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+    .badge-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared components injected by components.js -->
+  <div class="app-layout" id="app-layout">
+
+    <!-- Main Workspace -->
+    <main class="main-workspace" style="overflow-y: auto; background: #F8FAFC;">
+      <div class="container-fluid py-4" style="padding: 24px 32px !important;">
+        
+        <!-- Header -->
+        <div style="margin-bottom: 24px; border-bottom: 1.5px solid #0A2240; padding-bottom: 12px;">
+          <h1 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #0A2240; margin: 0 0 4px 0; letter-spacing: -0.5px;">System Audit Trail</h1>
+          <p style="font-size: 13.5px; color: #475569; margin: 0; font-family: 'Inter', sans-serif;">Complete ledger of physical field progress reports, automated linkages, and user approvals</p>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="audit-card" style="padding: 16px 20px; background: #F8FAFC; border: 1px solid #CBD5E1;">
+          <div class="audit-filter-bar" style="margin-bottom: 0;">
+            <div style="flex: 1; position: relative;">
+              <input type="text" id="auditSearchInput" onkeyup="filterAuditTrail()" placeholder="Search logs (e.g. 'Welding', 'ACT-101', 'Planner Approved')..." style="width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #CBD5E1; border-radius: 4px; font-size: 13px;">
+              <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 12px; color: #94A3B8; font-size: 13px;"></i>
+            </div>
+            
+            <select id="statusFilter" onchange="filterAuditTrail()" style="padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 4px; font-size: 13px; background: #FFFFFF;">
+              <option value="ALL">All Statuses</option>
+              <option value="Linked">Linked</option>
+              <option value="Pending Review">Pending Review</option>
+            </select>
+
+            <select id="sourceFilter" onchange="filterAuditTrail()" style="padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 4px; font-size: 13px; background: #FFFFFF;">
+              <option value="ALL">All Sources</option>
+              <option value="Voice Chat">Voice Chat</option>
+              <option value="Chat Interface">Chat Interface</option>
+              <option value="Text Report Upload">Text Report Upload</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Audit Trail Table -->
+        <div class="audit-card" style="padding: 0; overflow-x: auto;">
+          <table class="audit-table" id="auditTrailTable">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Timestamp</th>
+                <th style="width: 15%;">Source</th>
+                <th style="width: 25%;">Extracted Activity</th>
+                <th style="width: 10%;">Matched ID</th>
+                <th style="width: 25%;">Audit Trace Details</th>
+                <th style="width: 10%; text-align: center;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="auditTrailBody">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">Loading audit entries...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=5"></script>
+  <script>
+    let globalAuditLogs = [];
+
+    async function loadAuditTrail() {
+      const logs = await fetchAPI('/api/logs');
+      if (!logs) return;
+
+      globalAuditLogs = logs;
+      renderAuditLogs(logs);
+    }
+
+    function renderAuditLogs(entries) {
+      const tbody = document.getElementById('auditTrailBody');
+      if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No audit entries found matching criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = entries.map(log => {
+        const formattedDate = new Date(log.timestamp).toLocaleString();
+        const matchedId = log.matchedTaskId || '—';
+        const source = log.source || 'Manual Ingest';
+        
+        let badgeStyle = '';
+        if (log.status === 'Linked') {
+          badgeStyle = 'background: #DEF7EC; color: #03543F;';
+        } else {
+          badgeStyle = 'background: #FDE8E8; color: #9B1C1C;';
+        }
+
+        return `
+          <tr>
+            <td style="font-weight: 500; font-family: monospace; font-size: 11.5px; color: #475569;">${formattedDate}</td>
+            <td style="font-weight: 600; color: #1E293B;">${source}</td>
+            <td>
+              <div style="font-weight: 600; color: #0F172A;">${log.extracted?.activity || log.rawText}</div>
+              <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Discipline: ${log.extracted?.discipline || 'General'}</div>
+            </td>
+            <td style="font-family: monospace; font-weight: 700; color: #0A2240;">${matchedId}</td>
+            <td style="font-size: 12px; color: #475569; line-height: 1.4;">${log.auditTrail || 'Ingested report registered.'}</td>
+            <td style="text-align: center;">
+              <span class="badge-status" style="${badgeStyle}">${log.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterAuditTrail() {
+      const searchQuery = document.getElementById('auditSearchInput').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const sourceFilter = document.getElementById('sourceFilter').value;
+
+      const filtered = globalAuditLogs.filter(log => {
+        // Search filter
+        const matchSearch = 
+          (log.rawText && log.rawText.toLowerCase().includes(searchQuery)) ||
+          (log.extracted?.activity && log.extracted.activity.toLowerCase().includes(searchQuery)) ||
+          (log.matchedTaskId && log.matchedTaskId.toLowerCase().includes(searchQuery)) ||
+          (log.auditTrail && log.auditTrail.toLowerCase().includes(searchQuery));
+        
+        // Status filter
+        const matchStatus = statusFilter === 'ALL' || log.status === statusFilter;
+        
+        // Source filter
+        const matchSource = sourceFilter === 'ALL' || log.source === sourceFilter;
+
+        return matchSearch && matchStatus && matchSource;
+      });
+
+      renderAuditLogs(filtered);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderSharedComponents('audit');
+      updatePendingReviewBadge();
+      loadAuditTrail();
+    });
+  </script>
+  </div>
+</body>
+</html>
+

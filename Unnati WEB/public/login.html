@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unnati Login — OIL India</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --gov-primary: #D85800;
+      --gov-primary-light: #F97316;
+      --gov-accent: #0A2240;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F1F5F9;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* Top Gov India Banner */
+    .gov-top-banner {
+      background: #FFFFFF;
+      border-bottom: 2px solid #E2E8F0;
+      padding: 6px 20px;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .gov-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .gov-emblem {
+      height: 20px;
+    }
+    .gov-text-divider {
+      color: #CBD5E1;
+      margin: 0 4px;
+    }
+
+    /* Split login layout */
+    .login-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      height: 100%;
+    }
+
+    @media (max-width: 992px) {
+      .login-container {
+        grid-template-columns: 1fr;
+      }
+      .login-banner-side {
+        display: none !important;
+      }
+    }
+
+    /* Left Side: Brand & Visuals */
+    .login-banner-side {
+      background: linear-gradient(135deg, #0A2240 0%, #1E3B8A 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      color: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-banner-side::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(249, 115, 22, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.4) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 2;
+    }
+
+    .brand-logo-wrap img {
+      height: 48px;
+      background: #FFFFFF;
+      padding: 5px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand-logo-wrap h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-logo-wrap span {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.7);
+      display: block;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .banner-hero-text {
+      max-width: 500px;
+      z-index: 2;
+      margin-bottom: 80px;
+    }
+
+    .banner-hero-text h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      color: #FFFFFF;
+      letter-spacing: -0.5px;
+    }
+
+    .banner-hero-text p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+    }
+
+    .banner-footer {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.5);
+      z-index: 2;
+    }
+
+    /* Right Side: Form */
+    .login-form-side {
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .login-form-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+    }
+
+    .form-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .form-header p {
+      font-size: 13.5px;
+      color: #64748B;
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      color: #94A3B8;
+      font-size: 14px;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #334155;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--gov-primary);
+      box-shadow: 0 0 0 3px rgba(216, 88, 0, 0.08);
+    }
+
+    .toggle-pass-btn {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #94A3B8;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+    }
+    .toggle-pass-btn:hover {
+      color: #475569;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px 24px;
+      background: var(--gov-primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.12s;
+      font-family: 'Inter', sans-serif;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      background-color: var(--gov-primary-light);
+    }
+    .login-btn:active {
+      transform: scale(0.98);
+    }
+
+    .secure-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      color: #64748B;
+      margin-top: 28px;
+      line-height: 1.4;
+    }
+    .quick-login-btn {
+      font-size: 11px;
+      padding: 6px 10px;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      background: #F8FAFC;
+      color: #334155;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .quick-login-btn:hover {
+      background: #F1F5F9;
+      border-color: #94A3B8;
+      color: var(--gov-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Gov India Banner -->
+  <div class="gov-top-banner">
+    <div class="gov-banner-left">
+      <img class="gov-emblem" src="emblem.svg" alt="National Emblem of India">
+      <span class="text-dark font-weight-semibold">भारत सरकार</span>
+      <span class="gov-text-divider">|</span>
+      <span class="text-muted">Government of India</span>
+      <span class="gov-text-divider">|</span>
+      <span class="text-muted font-size-11">Ministry of Petroleum &amp; Natural Gas</span>
+    </div>
+  </div>
+
+  <!-- Login Main Container -->
+  <div class="login-container">
+    
+    <!-- Left Banner Side -->
+    <div class="login-banner-side">
+      <div class="brand-logo-wrap">
+        <img src="oil-india.svg" alt="Oil India Limited Logo">
+        <div>
+          <h2>UNNATI</h2>
+          <span>Intelligent Schedule-Linking Layer &amp; Progress Capture</span>
+        </div>
+      </div>
+
+      <div class="banner-hero-text">
+        <h1>Intelligent Primavera schedule synchronization.</h1>
+        <p>Sync site progress updates directly into master Primavera L5/L6 nodes. Extract key milestones through unstructured daily diaries and chat captures powered by Gemini.</p>
+      </div>
+
+      <div class="banner-footer">
+        Ministry of Electronics and Information Technology (MeitY) &copy; 2026. Made with UX4G Framework.
+      </div>
+    </div>
+
+    <!-- Right Form Side -->
+    <div class="login-form-side">
+      <div class="login-form-box">
+        
+        <div class="form-header">
+          <h2>Planning Portal Sign In</h2>
+          <p>Access your Oil India planning workspace</p>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="username">Username / Email</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="username" placeholder="Enter username (e.g. oil-admin)" required value="oil-admin">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label for="password" class="mb-0">Password</label>
+              <a href="#" class="text-decoration-none font-weight-semibold" style="font-size: 11.5px; color: var(--gov-primary);" onclick="alert('Please contact your administrator to reset password.')">Forgot password?</a>
+            </div>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="password" placeholder="Enter password" required value="password">
+              <button type="button" class="toggle-pass-btn" onclick="togglePasswordVisibility()">
+                <i class="fa-solid fa-eye" id="passEyeIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <div class="secure-note">
+          <i class="fa-solid fa-shield-halved text-success" style="font-size: 14px;"></i>
+          <span>Secure single sign-on system. Unauthorized access attempts are audited and logged.</span>
+        </div>
+
+        <div style="margin-top: 24px; border-top: 1px solid #E2E8F0; padding-top: 16px;">
+          <label style="font-size: 11px; font-weight: 700; color: #64748B; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-bolt text-warning me-1"></i> Quick Demo Logins
+          </label>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" class="quick-login-btn" onclick="quickLogin('oil-admin')">
+              💼 Admin
+            </button>
+            <button type="button" class="quick-login-btn" onclick="quickLogin('arjun-manager')">
+              📊 PM
+            </button>
+            <button type="button" class="quick-login-btn" onclick="quickLogin('rahul-hse')">
+              🛡️ HSE
+            </button>
+            <button type="button" class="quick-login-btn" onclick="quickLogin('amit-ops')">
+              ⚙️ Ops
+            </button>
+            <button type="button" class="quick-login-btn" onclick="quickLogin('field-user-1')">
+              👷 Field
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    window.quickLogin = function(username) {
+      document.getElementById('username').value = username;
+      document.getElementById('password').value = 'password';
+      const mockEvent = { preventDefault: () => {} };
+      handleLogin(mockEvent);
+    };
+
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('passEyeIcon');
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeIcon.className = 'fa-solid fa-eye-slash';
+      } else {
+        passInput.type = 'password';
+        eyeIcon.className = 'fa-solid fa-eye';
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          alert(data.error || 'Authentication failed.');
+          return;
+        }
+
+        // Save session details
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('username', data.user.username);
+        localStorage.setItem('assignedProjects', JSON.stringify(data.user.assignedProjects || []));
+        localStorage.setItem('userPermissions', JSON.stringify(data.user.permissions || []));
+        
+        // Handle redirect based on role
+        if (data.user.role === 'field') {
+          window.location.href = 'field.html';
+        } else {
+          const projects = data.user.assignedProjects || [];
+          if (projects.length > 0) {
+            localStorage.setItem('selectedProjectId', projects[0]);
+          } else {
+            localStorage.setItem('selectedProjectId', 'PROJ-1');
+          }
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        console.error('Login connection error:', err);
+        alert('Could not reach backend server. Please verify it is running on port 3000.');
+      }
+    }
+  </script>
+</body>
+</html>

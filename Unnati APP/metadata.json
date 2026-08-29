@@ -1,0 +1,7 @@
+{
+  "name": "Unnati",
+  "description": "Voice-first field operations and progress reporting for infrastructure and construction projects",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

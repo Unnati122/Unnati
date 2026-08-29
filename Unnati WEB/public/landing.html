@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unnati Landing — Oil India Limited</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Main Application Core CSS (identical styling) -->
+  <link rel="stylesheet" href="app.css?v=6">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #334155;
+      background-color: #FAFAFA;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+
+    /* Portal Login CTA Button styled dynamically */
+    .btn-portal-enter {
+      background: linear-gradient(135deg, var(--gov-primary) 0%, #C24F00 100%);
+      color: #FFFFFF !important;
+      font-weight: 700;
+      font-size: 12.5px;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-portal-enter:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(216, 88, 0, 0.2);
+    }
+    .landing-nav { display: flex; align-items: center; gap: 24px; margin-right: 28px; }
+    .landing-nav a { color: #64748B; font-size: 12px; font-weight: 600; text-decoration: none; }
+    .landing-nav a:hover { color: var(--gov-primary); }
+
+    .landing-main { flex: 1; background: #F8FAFC; }
+    .hero-section {
+      min-height: 460px;
+      display: flex;
+      align-items: center;
+      background-image: linear-gradient(90deg, rgba(10,34,64,0.96) 0%, rgba(10,34,64,0.86) 48%, rgba(10,34,64,0.42) 100%), url('pipeline_banner.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+    .hero-content { width: 100%; max-width: 1180px; margin: 0 auto; padding: 72px 32px; box-sizing: border-box; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; color: #FDBA74; font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 18px; }
+    .hero-eyebrow i { font-size: 9px; }
+    .hero-title { max-width: 690px; color: #FFFFFF; font-family: 'Outfit', sans-serif; font-size: 4.25rem; font-weight: 700; line-height: 1.05; letter-spacing: -1px; margin: 0 0 20px; }
+    .hero-title span { color: #FDBA74; }
+    .hero-copy { max-width: 590px; color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; margin: 0 0 30px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero-actions .btn { min-height: 42px; padding: 9px 18px; font-weight: 700; }
+    .btn-hero-primary { background: var(--gov-primary); color: #FFFFFF; border-color: var(--gov-primary); }
+    .btn-hero-primary:hover { background: var(--gov-primary-light); border-color: var(--gov-primary-light); color: #FFFFFF; }
+    .btn-hero-secondary { background: rgba(255,255,255,0.08); color: #FFFFFF; border-color: rgba(255,255,255,0.38); }
+    .btn-hero-secondary:hover { background: rgba(255,255,255,0.16); color: #FFFFFF; }
+    .section-wrap { max-width: 1180px; margin: 0 auto; padding: 76px 32px; box-sizing: border-box; }
+    .section-kicker { color: var(--gov-primary); font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; margin: 0 0 8px; }
+    .section-heading { color: #1E293B; font-family: 'Outfit', sans-serif; font-size: 26px; line-height: 1.2; margin: 0 0 12px; }
+    .section-intro { color: #64748B; font-size: 13px; line-height: 1.65; max-width: 720px; margin: 0; }
+    .problem-section { min-height: 58vh; display: flex; align-items: center; background: #FFFFFF; border-bottom: 1px solid #E2E8F0; scroll-margin-top: 20px; scroll-snap-align: start; }
+    .problem-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 52px; align-items: center; }
+    .problem-list { display: grid; gap: 13px; margin-top: 22px; }
+    .problem-item { display: flex; gap: 12px; color: #475569; font-size: 12.5px; line-height: 1.5; }
+    .problem-item i { color: var(--gov-primary); margin-top: 3px; }
+    .signal-panel { border-left: 3px solid var(--gov-primary); background: #FFF7ED; padding: 23px 25px; }
+    .signal-panel strong { display: block; color: #9A3412; font-family: 'Outfit', sans-serif; font-size: 18px; margin-bottom: 7px; }
+    .signal-panel p { color: #7C2D12; font-size: 12.5px; line-height: 1.6; margin: 0; }
+    .project-visual { background: #FFFFFF; padding: 40px 32px; }
+    .project-visual-inner { max-width: 1280px; margin: 0 auto; box-sizing: border-box; }
+    .project-visual figure { position: relative; height: 220px; margin: 0; overflow: hidden; }
+    .project-visual img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 58%; }
+    .project-visual figcaption { position: absolute; left: 24px; bottom: 20px; color: #FFFFFF; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; }
+    .project-visual figcaption span { display: block; color: rgba(255,255,255,0.72); font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 400; margin-top: 5px; }
+    .identity-section { min-height: 58vh; display: flex; align-items: center; background: #FFFFFF; border-bottom: 1px solid #E2E8F0; scroll-margin-top: 20px; scroll-snap-align: start; }
+    .identity-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 54px; align-items: start; }
+    .fit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 23px; }
+    .fit-item { border-left: 2px solid var(--gov-primary); padding: 3px 0 3px 13px; }
+    .fit-item h3 { color: #1E293B; font-family: 'Outfit', sans-serif; font-size: 14px; margin: 0 0 6px; }
+    .fit-item p { color: #64748B; font-size: 11.5px; line-height: 1.5; margin: 0; }
+    .identity-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; padding-top: 17px; border-top: 1px solid #E2E8F0; }
+    .identity-fact strong { display: block; color: var(--gov-primary); font-family: 'Outfit', sans-serif; font-size: 16px; margin-bottom: 3px; }
+    .identity-fact span { color: #64748B; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .discipline-panel { border: 1px solid #E2E8F0; background: #F8FAFC; }
+    .discipline-panel > summary { position: relative; cursor: pointer; list-style: none; padding: 16px 48px 16px 18px; color: #1E293B; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600; }
+    .discipline-panel > summary::-webkit-details-marker { display: none; }
+    .discipline-panel > summary::after { content: '+'; position: absolute; top: 50%; right: 18px; transform: translateY(-50%); color: var(--gov-primary); font-size: 20px; line-height: 1; }
+    .discipline-panel[open] > summary::after { content: '-'; }
+    .discipline-panel > summary span { display: block; color: #64748B; font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 400; margin-top: 4px; }
+    .discipline-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; padding: 0 18px 18px; }
+    .discipline-item { background: #FFFFFF; padding: 13px; }
+    .discipline-item strong { display: block; color: var(--gov-primary); font-size: 12px; margin-bottom: 4px; }
+    .discipline-item span { color: #64748B; font-size: 11px; line-height: 1.45; }
+    .capability-section { min-height: 58vh; display: flex; align-items: center; background: #F8FAFC; scroll-margin-top: 20px; scroll-snap-align: start; }
+    .capability-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 25px; }
+    .capability-item { background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 3px solid var(--gov-primary); padding: 21px 18px; min-height: 158px; box-sizing: border-box; }
+    .capability-icon { color: var(--gov-primary); font-size: 18px; margin-bottom: 14px; }
+    .capability-item h3 { color: #1E293B; font-family: 'Outfit', sans-serif; font-size: 15px; margin: 0 0 7px; }
+    .capability-item p { color: #64748B; font-size: 12px; line-height: 1.55; margin: 0; }
+    .capability-coverage { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 13px; margin-top: 24px; padding: 13px 0; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; color: #64748B; font-size: 11px; }
+    .capability-coverage strong { color: #1E293B; font-family: 'Outfit', sans-serif; font-size: 12px; }
+    .coverage-divider { color: #CBD5E1; }
+    .workflow-section { min-height: 58vh; display: flex; align-items: center; background: #FFFFFF; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; scroll-margin-top: 20px; scroll-snap-align: start; }
+    .workflow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin-top: 28px; }
+    .workflow-step { position: relative; padding: 0 18px 0 0; }
+    .workflow-step:not(:last-child)::after { content: ''; position: absolute; top: 16px; right: 14px; width: calc(100% - 52px); border-top: 1px dashed #CBD5E1; }
+    .workflow-number { position: relative; z-index: 1; display: grid; place-items: center; width: 32px; height: 32px; color: #FFFFFF; background: var(--gov-primary); border-radius: 50%; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+    .workflow-step h3 { color: #1E293B; font-family: 'Outfit', sans-serif; font-size: 14px; margin: 0 0 6px; }
+    .workflow-step p { color: #64748B; font-size: 11.5px; line-height: 1.5; margin: 0; max-width: 155px; }
+    .process-output { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; padding-top: 17px; border-top: 1px solid #E2E8F0; }
+    .process-output span { display: block; color: #94A3B8; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+    .process-output strong { color: #1E293B; font-size: 12px; }
+    .process-visual { background: #FFFFFF; padding: 28px 32px; border-bottom: 1px solid #E2E8F0; }
+    .process-visual-inner { max-width: 1280px; margin: 0 auto; }
+    .process-visual figure { margin: 0; }
+    .process-visual img { width: 100%; height: 210px; display: block; object-fit: cover; object-position: center 48%; }
+    .process-visual figcaption { color: #64748B; font-size: 11px; padding-top: 9px; }
+    .impact-section { min-height: 58vh; display: flex; align-items: center; background: #0A2240; color: #FFFFFF; scroll-margin-top: 20px; scroll-snap-align: start; }
+    .impact-section .section-kicker { color: #FDBA74; }
+    .impact-section .section-heading { color: #FFFFFF; }
+    .impact-section .section-intro { color: rgba(255,255,255,0.72); }
+    .impact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 27px; }
+    .impact-item { border-top: 1px solid rgba(255,255,255,0.25); padding-top: 15px; }
+    .impact-item strong { display: block; font-family: 'Outfit', sans-serif; font-size: 16px; margin-bottom: 5px; }
+    .impact-item span { color: rgba(255,255,255,0.68); font-size: 12px; line-height: 1.5; }
+    .landing-footer { color: #94A3B8; border-top: 1px solid #E2E8F0; background: #FFFFFF; text-align: center; font-size: 11px; padding: 14px 24px; }
+    @media (max-width: 900px) {
+      .hero-title { font-size: 3.4rem; }
+      .problem-grid { grid-template-columns: 1fr; gap: 28px; }
+      .capability-grid { grid-template-columns: repeat(2, 1fr); }
+      .workflow { grid-template-columns: repeat(3, 1fr); gap: 28px 0; }
+      .workflow-step:nth-child(3)::after { display: none; }
+    }
+    @media (max-width: 767px) {
+      .gov-top-banner { padding: 6px 12px; }
+      .gov-banner-left { gap: 6px; font-size: 10px; }
+      .gov-banner-left .gov-text-divider, .gov-banner-left .text-muted { display: none; }
+      .main-header { padding: 0.65rem 1rem; }
+      .brand-logo-container { gap: 10px; }
+      .brand-logo-img { height: 31px; }
+      .brand-subtitle { font-size: 0.68rem; }
+      .landing-nav { display: none; }
+      .hero-section { min-height: 500px; }
+      .hero-content { padding: 58px 22px; }
+      .hero-title { font-size: 2.8rem; }
+      .section-wrap { padding: 54px 22px; }
+      .problem-section, .identity-section, .capability-section, .workflow-section, .impact-section { min-height: auto; }
+      .project-visual { padding: 20px 22px; }
+      .project-visual figure { height: 180px; }
+      .project-visual figcaption { left: 18px; bottom: 16px; font-size: 16px; }
+      .identity-grid { grid-template-columns: 1fr; gap: 28px; }
+      .fit-grid { grid-template-columns: 1fr; gap: 16px; }
+      .identity-facts { gap: 10px; }
+      .capability-grid, .impact-grid { grid-template-columns: 1fr; gap: 14px; }
+      .workflow { grid-template-columns: 1fr; gap: 22px; }
+      .workflow-step::after { display: none !important; }
+      .process-output { grid-template-columns: repeat(2, 1fr); gap: 18px 12px; }
+      .discipline-list { grid-template-columns: 1fr; }
+      .process-visual { padding: 20px 22px; }
+      .process-visual img { height: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Gov India Banner (Identical to components.js) -->
+  <div class="gov-top-banner">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <div class="gov-banner-left">
+        <img class="gov-emblem" src="emblem.svg" alt="National Emblem of India">
+        <span class="text-dark font-weight-semibold">भारत सरकार</span>
+        <span class="gov-text-divider">|</span>
+        <span class="text-muted">Government of India</span>
+        <span class="gov-text-divider">|</span>
+        <span class="text-muted font-size-11">Ministry of Petroleum &amp; Natural Gas</span>
+      </div>
+      <div class="gov-banner-right d-none d-md-flex" style="gap:12px;">
+        <a href="#" class="font-size-11 text-decoration-none">Screen Reader Access</a>
+        <a href="#" class="font-size-11 text-decoration-none">A-</a>
+        <a href="#" class="font-size-11 text-decoration-none font-weight-bold">A</a>
+        <a href="#" class="font-size-11 text-decoration-none">A+</a>
+        <a href="#" class="font-size-11 text-decoration-none font-weight-semibold">English</a>
+        <a href="#" class="font-size-11 text-decoration-none">हिन्दी</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header (Identical markup to components.js) -->
+  <header class="main-header navbar navbar-expand-lg">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <a class="navbar-brand brand-logo-container text-decoration-none" href="#">
+        <img class="brand-logo-img" src="oil-india.svg" alt="Oil India Limited Logo">
+        <div class="brand-text">
+          <h1 class="brand-title">UNNATI</h1>
+          <span class="brand-subtitle">Intelligent Schedule-Linking Layer &amp; Progress Capture</span>
+        </div>
+      </a>
+      <div class="header-right ms-auto d-flex align-items-center">
+          <nav class="landing-nav" aria-label="Landing page navigation">
+            <a href="#fit">Use cases</a>
+            <a href="#solution">Solution</a>
+            <a href="#workflow">Workflow</a>
+            <a href="#impact">Impact</a>
+          </nav>
+          <a href="login.html" class="btn-portal-enter">
+          <i class="fa-solid fa-lock"></i> Portal Sign In
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="landing-main">
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-eyebrow"><i class="fa-solid fa-circle"></i> SIH 26122 | Team Pragati</div>
+        <h2 class="hero-title">Connect field progress to the <span>baseline schedule.</span></h2>
+        <p class="hero-copy">UNNATI captures site updates, identifies the relevant L5/L6 activity, and records verified progress for infrastructure project teams.</p>
+        <div class="hero-actions">
+          <a href="login.html" class="btn btn-hero-primary"><i class="fa-solid fa-arrow-right me-2"></i>Enter planning portal</a>
+          <a href="#solution" class="btn btn-hero-secondary"><i class="fa-solid fa-diagram-project me-2"></i>See how it works</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="problem-section">
+      <div class="section-wrap problem-grid">
+        <div>
+          <p class="section-kicker">The challenge</p>
+            <h2 class="section-heading">Convert field updates into schedule data.</h2>
+            <p class="section-intro">Master schedules in Primavera or MS Project define L5/L6 activities. Site progress is received through reports, spreadsheets, diaries, and supervisor updates that vary in format and terminology.</p>
+          <div class="problem-list">
+            <div class="problem-item"><i class="fa-solid fa-clock"></i><span>Progress reconciliation lags behind actual work by days or weeks.</span></div>
+            <div class="problem-item"><i class="fa-solid fa-triangle-exclamation"></i><span>Delay analysis and forecasting run on stale, disconnected information.</span></div>
+            <div class="problem-item"><i class="fa-solid fa-box-archive"></i><span>Real project learnings are lost instead of informing the next plan.</span></div>
+          </div>
+        </div>
+        <div class="signal-panel"><strong>“Spool erected.”</strong><p>UNNATI understands that this field update may refer to the planned activity “Erect Line 24-XX”, then links it with a confidence score for review.</p></div>
+      </div>
+    </section>
+
+    <section class="project-visual" aria-label="Infrastructure project context">
+      <div class="project-visual-inner">
+        <figure>
+          <img src="pipeline_banner.jpg" alt="Pipeline infrastructure under construction">
+          <figcaption>Infrastructure delivery in the field<span>Connecting execution data with the project baseline.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="identity-section" id="fit">
+      <div class="section-wrap identity-grid">
+        <div>
+          <p class="section-kicker">Who we are</p>
+          <h2 class="section-heading">A project intelligence layer for field and planning teams.</h2>
+          <p class="section-intro">UNNATI is a prototype from Team Pragati for Oil India Limited. It connects unstructured execution updates with the baseline schedule so project information can be captured, checked, and used.</p>
+          <div class="identity-facts">
+            <div class="identity-fact"><strong>26122</strong><span>SIH problem statement</span></div>
+            <div class="identity-fact"><strong>Oil India</strong><span>Organization</span></div>
+            <div class="identity-fact"><strong>Software</strong><span>Category</span></div>
+          </div>
+        </div>
+        <div>
+          <p class="section-kicker">Where it fits</p>
+          <div class="fit-grid">
+            <article class="fit-item"><h3>Pipeline projects</h3><p>Track construction activities, installation progress, and segment-level updates.</p></article>
+            <article class="fit-item"><h3>Plant construction</h3><p>Coordinate civil, mechanical, piping, and commissioning progress in one record.</p></article>
+            <article class="fit-item"><h3>Multi-discipline delivery</h3><p>Give planners a shared view when teams report using different terminology.</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="capability-section" id="solution">
+      <div class="section-wrap">
+        <p class="section-kicker">Core functions</p>
+        <h2 class="section-heading">A controlled process from input to update.</h2>
+        <p class="section-intro">The system connects field reporting with baseline activities and gives planners control over uncertain matches.</p>
+        <div class="capability-grid">
+          <article class="capability-item"><div class="capability-icon"><i class="fa-solid fa-file-import"></i></div><h3>1. Ingest</h3><p>Read daily reports and discipline spreadsheets, with OCR and ASR ready as future extensions.</p></article>
+          <article class="capability-item"><div class="capability-icon"><i class="fa-solid fa-comments"></i></div><h3>2. Capture</h3><p>Let supervisors type or speak a natural update instead of completing rigid forms.</p></article>
+          <article class="capability-item"><div class="capability-icon"><i class="fa-solid fa-link"></i></div><h3>3. Fuzzy-match &amp; link</h3><p>Connect loose descriptions to L5/L6 activities and flag uncertain matches for planners.</p></article>
+          <article class="capability-item"><div class="capability-icon"><i class="fa-solid fa-brain"></i></div><h3>4. Update &amp; learn</h3><p>Record dates, confidence, audit history, and structured memory for future analytics.</p></article>
+        </div>
+        <div class="capability-coverage"><strong>Works with</strong><span>Daily reports</span><span class="coverage-divider">|</span><span>Spreadsheets</span><span class="coverage-divider">|</span><span>L5/L6 schedules</span><span class="coverage-divider">|</span><span>Audit-ready records</span></div>
+        <details class="discipline-panel">
+          <summary>Built for different discipline vocabularies<span>Explore how one workflow supports the teams contributing to the same project.</span></summary>
+          <div class="discipline-list">
+            <div class="discipline-item"><strong>Civil</strong><span>Earthworks, foundations, roads, and structural progress.</span></div>
+            <div class="discipline-item"><strong>Piping</strong><span>Spools, line installation, welding, and testing activities.</span></div>
+            <div class="discipline-item"><strong>Electrical</strong><span>Cabling, equipment installation, and energisation updates.</span></div>
+            <div class="discipline-item"><strong>Instrumentation</strong><span>Instrument installation, calibration, and loop checks.</span></div>
+            <div class="discipline-item"><strong>Quality / HSE</strong><span>Inspections, permits, audits, and safety observations.</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="workflow-section" id="workflow">
+      <div class="section-wrap">
+        <p class="section-kicker">Process</p>
+        <h2 class="section-heading">From field input to verified schedule record.</h2>
+        <p class="section-intro">UNNATI extracts activity details, proposes a schedule link, and routes low-confidence results for planner review.</p>
+        <div class="workflow">
+          <div class="workflow-step"><div class="workflow-number">1</div><h3>Field input</h3><p>Report progress in natural language or upload a daily file.</p></div>
+          <div class="workflow-step"><div class="workflow-number">2</div><h3>Extract</h3><p>Identify activity, date, discipline, and status.</p></div>
+          <div class="workflow-step"><div class="workflow-number">3</div><h3>Match</h3><p>Find the closest L5/L6 baseline activity.</p></div>
+          <div class="workflow-step"><div class="workflow-number">4</div><h3>Review</h3><p>Route uncertain matches to the planner queue.</p></div>
+          <div class="workflow-step"><div class="workflow-number">5</div><h3>Learn</h3><p>Store the verified outcome for analytics and reuse.</p></div>
+        </div>
+        <div class="process-output">
+          <div><span>Activity</span><strong>L5/L6 baseline link</strong></div>
+          <div><span>Progress data</span><strong>Actual dates and status</strong></div>
+          <div><span>Control</span><strong>Confidence-based review</strong></div>
+          <div><span>Record</span><strong>Audit trail and memory</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="process-visual" aria-label="Construction project context">
+      <div class="process-visual-inner">
+        <figure>
+          <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&amp;fit=crop&amp;w=1800&amp;q=85" alt="Construction team working on an infrastructure project">
+          <figcaption>Field execution context</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="impact-section" id="impact">
+      <div class="section-wrap">
+        <p class="section-kicker">Operational value</p>
+        <h2 class="section-heading">Better progress data for project decisions.</h2>
+        <p class="section-intro">The prototype makes site progress traceable, reviewable, and available for project reporting and future analysis.</p>
+        <div class="impact-grid">
+          <div class="impact-item"><strong>Near real-time visibility</strong><span>Close the gap between planning and execution.</span></div>
+          <div class="impact-item"><strong>Trustworthy automation</strong><span>Reduce manual reconciliation and protect the schedule with confidence-based review.</span></div>
+          <div class="impact-item"><strong>Institutional memory</strong><span>Turn actual durations and bottlenecks into insight for every future project.</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="landing-footer">UNNATI | Intelligent Schedule-Linking Layer &amp; Progress Capture | Oil India Limited</footer>
+
+</body>
+</html>
