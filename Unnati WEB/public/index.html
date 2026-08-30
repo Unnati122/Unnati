@@ -47,7 +47,7 @@
                   <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 700; color: #FFFFFF; margin: 0 0 6px 0; letter-spacing: 0.3px;">Project Pipeline Tracking – Segment 1–2</h2>
                   <p style="font-size: 13px; color: rgba(255,255,255,0.72); margin: 0; line-height: 1.5;">Interactive tracking dashboard linked to master Primavera schedule. Powered by Gemini LLM NLP extraction.</p>
                 </div>
-                <div style="flex-shrink: 0; margin-left: 24px;">
+                <div style="flex-shrink: 0; margin-left: 24px; display: flex; gap: 12px; align-items: center;">
                   <span style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.5px;">
                     <i class="fa-solid fa-oil-well"></i> OIL INDIA LTD
                   </span>
@@ -64,7 +64,7 @@
               <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                   <h6 class="text-uppercase mb-1">Total L5/L6 Tasks</h6>
-                  <h3 class="mb-0" id="totalTasksCount">0</h3>
+                  <h3 class="mb-0" id="totalTasksCount"><span class="skeleton-box" style="width: 35px; height: 24px; vertical-align: middle;"></span></h3>
                 </div>
                 <div class="kpi-icon">
                   <i class="fa-solid fa-list-check"></i>
@@ -77,7 +77,7 @@
               <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                   <h6 class="text-uppercase mb-1">Project Progress</h6>
-                  <h3 class="mb-0" id="overallProgress">0%</h3>
+                  <h3 class="mb-0" id="overallProgress"><span class="skeleton-box" style="width: 50px; height: 24px; vertical-align: middle;"></span></h3>
                 </div>
                 <div class="kpi-icon">
                   <i class="fa-solid fa-circle-nodes"></i>
@@ -90,7 +90,7 @@
               <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                   <h6 class="text-uppercase mb-1">Pending Reviews</h6>
-                  <h3 class="mb-0" id="pendingReviewsCount">0</h3>
+                  <h3 class="mb-0" id="pendingReviewsCount"><span class="skeleton-box" style="width: 30px; height: 24px; vertical-align: middle;"></span></h3>
                 </div>
                 <div class="kpi-icon">
                   <i class="fa-solid fa-triangle-exclamation"></i>
@@ -103,7 +103,7 @@
               <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                   <h6 class="text-uppercase mb-1">Avg Confidence Score</h6>
-                  <h3 class="mb-0" id="avgConfidence">0%</h3>
+                  <h3 class="mb-0" id="avgConfidence"><span class="skeleton-box" style="width: 50px; height: 24px; vertical-align: middle;"></span></h3>
                 </div>
                 <div class="kpi-icon">
                   <i class="fa-solid fa-shield-halved"></i>
@@ -125,9 +125,21 @@
                 <a href="review.html" class="btn btn-link btn-sm text-primary p-0 text-decoration-none font-weight-bold" style="font-size: 12.5px;">View Review Queue</a>
               </div>
               <div class="card-body timeline-body" id="timelineContainer" style="padding: 24px 32px;">
-                <!-- Timeline items rendered dynamically -->
-                <div class="text-center py-4 text-muted">
-                  Loading activity logs...
+                <!-- Timeline items skeleton loader -->
+                <div class="skeleton-timeline-item">
+                  <span class="skeleton-box" style="width: 120px; height: 12px; margin-bottom: 6px;"></span>
+                  <div class="skeleton-box" style="width: 80%; height: 16px; margin-bottom: 6px; display: block;"></div>
+                  <div class="skeleton-box" style="width: 50%; height: 12px; display: block;"></div>
+                </div>
+                <div class="skeleton-timeline-item">
+                  <span class="skeleton-box" style="width: 100px; height: 12px; margin-bottom: 6px;"></span>
+                  <div class="skeleton-box" style="width: 70%; height: 16px; margin-bottom: 6px; display: block;"></div>
+                  <div class="skeleton-box" style="width: 45%; height: 12px; display: block;"></div>
+                </div>
+                <div class="skeleton-timeline-item">
+                  <span class="skeleton-box" style="width: 130px; height: 12px; margin-bottom: 6px;"></span>
+                  <div class="skeleton-box" style="width: 75%; height: 16px; margin-bottom: 6px; display: block;"></div>
+                  <div class="skeleton-box" style="width: 60%; height: 12px; display: block;"></div>
                 </div>
               </div>
             </div>

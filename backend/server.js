@@ -5,6 +5,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const multer = require('multer');
 const geminiService = require('./services/geminiService');
+const emailService = require('./services/emailService');
 const db = require('./services/db');
 
 dotenv.config();
@@ -15,28 +16,32 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve landing.html at the root route '/'
+// Root API route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+  res.json({ message: 'Unnati Backend is running' });
 });
 
-// Configure multer storage for audio uploads
-const uploadDir = path.join(__dirname, 'public', 'uploads');
+// Configure multer storage for audio and photo uploads
+const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+app.use('/uploads', express.static(uploadDir));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, `audio-${Date.now()}-${Math.floor(Math.random() * 1000)}${path.extname(file.originalname) || '.m4a'}`);
+    const prefix = file.fieldname === 'photo' ? 'photo' : 'audio';
+    const ext = path.extname(file.originalname) || (file.fieldname === 'photo' ? '.jpg' : '.m4a');
+    cb(null, `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}${ext}`);
   }
 });
 const upload = multer({ storage: storage });
 
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// Static serving removed for dedicated backend mode
 
 // Initialize PostgreSQL database tables & seeds on startup
 db.initDatabase().catch(err => {
@@ -166,7 +171,8 @@ function mapLogRow(row) {
     matchedTaskDescription: row.matched_task_description,
     confidenceScore: row.confidence_score,
     status: row.status,
-    auditTrail: row.audit_trail
+    auditTrail: row.audit_trail,
+    photoFilePath: row.photo_file_path
   };
 }
 
@@ -672,32 +678,6 @@ app.post('/api/approve-plan', authenticateUser, authorize('approve_plan'), async
     // Clean logs for this projectId
     await db.query('DELETE FROM progress_logs WHERE project_id = $1', [projectId]);
 
-    // Add initial seed log for plan approval
-    const initLogId = `log-${Date.now()}`;
-    const auditTrail = `Project implementation plan approved and baseline tasks initialized on ${new Date().toLocaleString()}.`;
-    await db.query(
-      `INSERT INTO progress_logs (
-        id, project_id, timestamp, worker_id, source, raw_text,
-        extracted_activity, extracted_date, extracted_discipline, extracted_status,
-        confidence_score, status, audit_trail
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-      [
-        initLogId,
-        projectId,
-        new Date().toISOString(),
-        req.user.username,
-        'System Planner',
-        `AI project plan approved and applied for project ${projectId}. Created ${tasks.length} baseline tasks.`,
-        'Project Plan Approved',
-        new Date().toISOString().split('T')[0],
-        'Management',
-        'Completed',
-        1.0,
-        'Linked',
-        auditTrail
-      ]
-    );
-
     res.json({ success: true, message: 'Plan approved and baseline schedule generated successfully.', taskCount: tasks.length });
   } catch (err) {
     console.error('Error approving plan:', err);
@@ -713,7 +693,7 @@ app.post(['/api/login', '/api/auth/login'], async (req, res) => {
   }
 
   try {
-    const result = await db.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username.trim(), password.trim()]);
+    const result = await db.query('SELECT * FROM users WHERE (username = $1 OR email = $1) AND password = $2', [username.trim(), password.trim()]);
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials. Please verify your username and password.' });
@@ -725,18 +705,87 @@ app.post(['/api/login', '/api/auth/login'], async (req, res) => {
       return res.status(403).json({ error: 'Forbidden: Account is currently inactive. Contact OIL Administration.' });
     }
 
-    const token = `token-${user.username}`;
-    res.json({
-      success: true,
-      token: token,
-      user: {
+      if (user.role !== 'admin' && user.assigned_projects && user.assigned_projects.length > 0) {
+      const placeholders = user.assigned_projects.map((_, i) => '$' + (i + 1)).join(', ');
+      const projResult = await db.query(`SELECT id, name, location, status, latitude, longitude, radius FROM projects WHERE id IN (${placeholders})`, user.assigned_projects);
+      
+      const hasActiveProject = projResult.rows.some(p => p.status === 'active');
+      const allDeleted = projResult.rows.length > 0 && projResult.rows.every(p => p.status === 'deleted');
+      const allPaused = projResult.rows.length > 0 && projResult.rows.every(p => p.status === 'paused');
+
+      if (!hasActiveProject && projResult.rows.length > 0) {
+        if (allDeleted) {
+           return res.status(403).json({ error: 'Access Denied: Your assigned project has been deleted.' });
+        } else {
+           return res.status(403).json({ error: 'Access Denied: Your assigned project is currently paused.' });
+        }
+      }
+
+      // Geofence check for field workers (TEMPORARILY DISABLED)
+      /*
+      if (user.role === 'field' && projResult.rows.length > 0) {
+        const proj = projResult.rows[0]; // Assuming one assigned project
+        if (proj.latitude && proj.longitude && proj.radius) {
+          if (!req.body.latitude || !req.body.longitude) {
+            return res.status(403).json({ error: 'Location required: Please enable GPS to log into this geofenced project.' });
+          }
+
+          const R = 6371e3; // metres
+          const lat1 = parseFloat(req.body.latitude) * Math.PI/180;
+          const lat2 = proj.latitude * Math.PI/180;
+          const deltaLat = (proj.latitude - parseFloat(req.body.latitude)) * Math.PI/180;
+          const deltaLon = (proj.longitude - parseFloat(req.body.longitude)) * Math.PI/180;
+
+          const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+                    Math.cos(lat1) * Math.cos(lat2) *
+                    Math.sin(deltaLon/2) * Math.sin(deltaLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = R * c;
+
+          const radiusWithBuffer = proj.radius + 50; // 50m GPS inaccuracy buffer
+          
+          if (distance > radiusWithBuffer) {
+             return res.status(403).json({ error: `Geofence Blocked: You are ${Math.round(distance)}m away. Please move into the designated project area to log in.` });
+          }
+        }
+      }
+      */
+      const activeProj = (projResult && projResult.rows.length > 0) ? projResult.rows[0] : null;
+
+      userObj = {
         username: user.username,
         name: user.name,
         role: user.role,
         responsibility: user.responsibility,
-        assignedProjects: user.assigned_projects || [],
-        permissions: user.permissions || []
-      }
+        assignedProjects: (user.assigned_projects || []).map(String),
+        permissions: user.permissions || [],
+        phone: user.phone || '',
+        digitalId: user.digital_id || '',
+        projectDetails: activeProj ? {
+          id: String(activeProj.id),
+          name: activeProj.name,
+          location: activeProj.location
+        } : null
+      };
+    } else {
+      userObj = {
+        username: user.username,
+        name: user.name,
+        role: user.role,
+        responsibility: user.responsibility,
+        assignedProjects: (user.assigned_projects || []).map(String),
+        permissions: user.permissions || [],
+        phone: user.phone || '',
+        digitalId: user.digital_id || '',
+        projectDetails: null
+      };
+    }
+
+    const token = `token-${user.username}`;
+    res.json({
+      success: true,
+      token: token,
+      user: userObj
     });
   } catch (err) {
     console.error('Error logging in:', err);
@@ -744,12 +793,666 @@ app.post(['/api/login', '/api/auth/login'], async (req, res) => {
   }
 });
 
+// 5.4.0 Verify Location on App Foreground
+app.post('/api/auth/verify-location', authenticateUser, async (req, res) => {
+  const { latitude, longitude } = req.body;
+  const user = req.user;
+
+  if (user.role !== 'field' || !user.assigned_projects || user.assigned_projects.length === 0) {
+    return res.json({ allowed: true, message: 'No location restrictions for this user role or no active projects.' });
+  }
+
+  try {
+    const placeholders = user.assigned_projects.map((_, i) => '$' + (i + 1)).join(', ');
+    const projResult = await db.query(`SELECT status, latitude, longitude, radius FROM projects WHERE id IN (${placeholders})`, user.assigned_projects);
+    
+    if (projResult.rows.length === 0) {
+      return res.json({ allowed: true, message: 'No active projects found.' });
+    }
+
+    const proj = projResult.rows[0];
+    if (proj.status !== 'active') {
+       return res.json({ allowed: false, message: 'Access Denied: Your assigned project is not active.' });
+    }
+
+    if (proj.latitude && proj.longitude && proj.radius) {
+      console.log(`[Verify-Location] Worker: ${user.username}, Received Lat: ${latitude}, Received Lon: ${longitude}`);
+      console.log(`[Verify-Location] Project ${proj.name} Lat: ${proj.latitude}, Lon: ${proj.longitude}, Radius: ${proj.radius}`);
+      if (!latitude || !longitude) {
+        return res.json({ allowed: false, message: 'Location required: Please enable GPS to access this geofenced project.' });
+      }
+
+      const R = 6371e3; // metres
+      const lat1 = parseFloat(latitude) * Math.PI/180;
+      const lat2 = proj.latitude * Math.PI/180;
+      const deltaLat = (proj.latitude - parseFloat(latitude)) * Math.PI/180;
+      const deltaLon = (proj.longitude - parseFloat(longitude)) * Math.PI/180;
+
+      const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+                Math.cos(lat1) * Math.cos(lat2) *
+                Math.sin(deltaLon/2) * Math.sin(deltaLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c;
+
+      const radiusWithBuffer = proj.radius + 50; // 50m GPS inaccuracy buffer
+      
+      if (distance > radiusWithBuffer) {
+         return res.json({ allowed: false, message: `Geofence Blocked: You are ${Math.round(distance)}m away. Please move into the designated project area.` });
+      }
+    }
+
+    return res.json({ allowed: true, message: 'Location verified. Inside geofence.' });
+  } catch (err) {
+    console.error('Error verifying location:', err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// 5.4.1 Forgot Password
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  try {
+    const result = await db.query('SELECT username, name FROM users WHERE email = $1', [email.trim()]);
+    if (result.rows.length === 0) {
+      // Return success even if not found to prevent email enumeration
+      return res.json({ success: true, message: 'If that email exists, an OTP has been sent.' });
+    }
+
+    const user = result.rows[0];
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit OTP
+    const expiry = new Date(Date.now() + 10 * 60000); // 10 minutes from now
+
+    await db.query(
+      'UPDATE users SET reset_otp = $1, reset_otp_expiry = $2 WHERE email = $3',
+      [otp, expiry, email.trim()]
+    );
+
+    const otpEmailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <style>
+        .force-white { background-image: linear-gradient(#ffffff, #ffffff) !important; color: #000000 !important; }
+        .force-orange { color: #ea580c !important; }
+        .force-text { color: #333333 !important; }
+      </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #ffffff;" class="force-white">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 40px 20px;" class="force-white">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="100%" style="max-width: 500px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" cellspacing="0" cellpadding="0" border="0" class="force-white">
+              <tr>
+                <td style="padding-bottom: 32px; text-align: left;">
+                  <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 1px;" class="force-orange">UNNATI</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom: 24px; text-align: left;">
+                  <p style="margin: 0; font-size: 16px; font-weight: 400; line-height: 1.5; color: #333333;" class="force-text">
+                    Hello ${user.name},<br><br>
+                    We received a request to reset your password. Use the OTP below to proceed. This code is valid for 10 minutes.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom: 32px; text-align: left;">
+                  <table role="presentation" width="100%" style="border-left: 3px solid #ea580c; padding-left: 16px;" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td style="padding-bottom: 8px;">
+                        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666666;">Your OTP Code</span><br>
+                        <strong style="font-size: 24px; letter-spacing: 4px; color: #000000; font-family: monospace;">${otp}</strong>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="border-top: 1px solid #eeeeee; padding-top: 24px; text-align: left;">
+                  <p style="margin: 0; font-size: 12px; color: #999999; line-height: 1.5;">
+                    If you did not request a password reset, please ignore this email.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+    `;
+
+    await emailService.sendEmail({
+      to: email.trim(),
+      subject: 'Unnati - Password Reset OTP',
+      body: `Your OTP for password reset is ${otp}. It is valid for 10 minutes.`,
+      html: otpEmailHtml
+    });
+
+    res.json({ success: true, message: 'If that email exists, an OTP has been sent.' });
+  } catch (err) {
+    console.error('Error in forgot-password:', err);
+    res.status(500).json({ error: 'Failed to process request' });
+  }
+});
+
+// 5.4.2 Reset Password
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ error: 'Email, OTP, and new password are required' });
+  }
+
+  try {
+    const result = await db.query(
+      'SELECT reset_otp, reset_otp_expiry FROM users WHERE email = $1',
+      [email.trim()]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid request' });
+    }
+
+    const user = result.rows[0];
+    
+    if (user.reset_otp !== otp.trim()) {
+      return res.status(400).json({ error: 'Invalid OTP' });
+    }
+
+    if (new Date() > new Date(user.reset_otp_expiry)) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+    }
+
+    // Reset password and clear OTP
+    await db.query(
+      'UPDATE users SET password = $1, reset_otp = NULL, reset_otp_expiry = NULL WHERE email = $2',
+      [newPassword, email.trim()]
+    );
+
+    res.json({ success: true, message: 'Password has been reset successfully.' });
+  } catch (err) {
+    console.error('Error in reset-password:', err);
+    res.status(500).json({ error: 'Failed to process request' });
+  }
+});
+
+
 // 5.5 worker identity endpoint
 app.get('/api/me', authenticateUser, (req, res) => {
   res.json(req.user);
 });
 
-// 5.6 worker assigned project details
+// 6. Admin Create Project and Manager
+app.post('/api/admin/projects', authenticateUser, authorize('admin_only'), async (req, res) => {
+  const { projectId, projectName, location, client, managerName, managerUsername, managerEmail, managerPassword } = req.body;
+  
+  if (!projectId || !projectName || !managerUsername || !managerEmail || !managerPassword) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  try {
+    // Check for duplicate project ID
+    const existingProject = await db.query('SELECT id FROM projects WHERE id = $1', [projectId.trim()]);
+    if (existingProject.rows.length > 0) {
+      return res.status(409).json({ error: `Project ID "${projectId}" already exists. Please use a different ID.` });
+    }
+
+    const existing = await db.query('SELECT username FROM users WHERE username = $1', [managerUsername.trim()]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'Manager username already exists.' });
+    }
+
+    // Insert Project
+    await db.query(
+      'INSERT INTO projects (id, name, code, location, client, active_workers_count) VALUES ($1, $2, $3, $4, $5, 0)',
+      [projectId.trim(), projectName.trim(), projectId.trim(), location || '', client || '']
+    );
+
+    // Insert Manager
+    await db.query(
+      'INSERT INTO users (username, password, email, role, name, status, responsibility, assigned_projects) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [
+        managerUsername.trim(), 
+        managerPassword.trim(), 
+        managerEmail.trim(), 
+        'manager', 
+        managerName.trim(), 
+        'active', 
+        'Project Manager', 
+        `{${projectId.trim()}}`
+      ]
+    );
+
+    // Send Email
+    const managerHtmlTemplate = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <style>
+        .force-white { background-image: linear-gradient(#ffffff, #ffffff) !important; color: #000000 !important; }
+        .force-orange { color: #ea580c !important; }
+        .force-text { color: #333333 !important; }
+      </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #ffffff;" class="force-white">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 40px 20px;" class="force-white">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="100%" style="max-width: 500px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" cellspacing="0" cellpadding="0" border="0" class="force-white">
+              
+              <!-- Logo / Header -->
+              <tr>
+                <td style="padding-bottom: 32px; text-align: left;">
+                  <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 1px;" class="force-orange">UNNATI</h1>
+                </td>
+              </tr>
+              
+              <!-- Greeting -->
+              <tr>
+                <td style="padding-bottom: 24px; text-align: left;">
+                  <p style="margin: 0; font-size: 16px; font-weight: 400; line-height: 1.5; color: #333333;" class="force-text">
+                    Hello ${managerName},<br><br>
+                    You have been assigned as the Project Manager for <strong>${projectName}</strong>.
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Credentials Box -->
+              <tr>
+                <td style="padding-bottom: 32px; text-align: left;">
+                  <table role="presentation" width="100%" style="border-left: 3px solid #ea580c; padding-left: 16px;" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td style="padding-bottom: 8px;">
+                        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666666;">Username</span><br>
+                        <strong style="font-size: 16px; color: #000000; font-family: monospace;">${managerUsername}</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666666;">Password</span><br>
+                        <strong style="font-size: 16px; color: #000000; font-family: monospace;">${managerPassword}</strong>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Action Button -->
+              <tr>
+                <td style="padding-bottom: 40px; text-align: left;">
+                  <a href="http://localhost:4000/login" style="background-image: linear-gradient(#ea580c, #ea580c) !important; color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: 600; font-size: 14px; display: inline-block;">Log in to Workspace</a>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="border-top: 1px solid #eeeeee; padding-top: 24px; text-align: left;">
+                  <p style="margin: 0; font-size: 12px; color: #999999; line-height: 1.5;">
+                    This is an automated message.<br>Please change your password upon your first login.
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+    `;
+
+    await emailService.sendEmail({
+      to: managerEmail.trim(),
+      subject: 'Welcome to Unnati - Manager Credentials',
+      body: `Hello ${managerName},\n\nYou have been assigned as the manager for project: ${projectName}.\nHere are your login credentials:\n\nUsername: ${managerUsername}\nPassword: ${managerPassword}\n\nPlease login and change your password when possible.\n\nBest,\nUnnati Admin`,
+      html: managerHtmlTemplate
+    });
+
+    res.json({ success: true, message: 'Project and Manager created successfully. Credentials emailed.' });
+  } catch (err) {
+    console.error('Error creating project/manager:', err);
+    res.status(500).json({ error: 'Database transaction failed.' });
+  }
+});
+
+// 6.5 Get Projects
+app.get('/api/projects', authenticateUser, async (req, res) => {
+  try {
+    let query = 'SELECT id, name, code, location, client, status, active_workers_count FROM projects ORDER BY created_at DESC';
+    let values = [];
+    
+    if (req.user.role !== 'admin') {
+      const assigned = req.user.assignedProjects || [];
+      if (assigned.length === 0) {
+        return res.json([]);
+      }
+      query = 'SELECT id, name, code, location, client, status, active_workers_count FROM projects WHERE id = ANY($1) ORDER BY created_at DESC';
+      values = [assigned];
+    }
+    
+    const result = await db.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching projects:', err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// 6.6 Update Project Status
+app.put('/api/admin/projects/:id/status', authenticateUser, authorize('admin_only'), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!['active', 'paused'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  try {
+    await db.query('UPDATE projects SET status = $1 WHERE id = $2', [status, id]);
+    res.json({ success: true, message: `Project status updated to ${status}` });
+  } catch (err) {
+    console.error('Error updating project status:', err);
+    res.status(500).json({ error: 'Database update failed' });
+  }
+});
+
+// 6.7 Delete Project
+app.delete('/api/admin/projects/:id', authenticateUser, authorize('admin_only'), async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // Delete all users (managers/workers) assigned to this project
+    await db.query('DELETE FROM users WHERE $1 = ANY(assigned_projects)', [id]);
+    
+    // Delete the project itself
+    await db.query('DELETE FROM projects WHERE id = $1', [id]);
+    
+    res.json({ success: true, message: 'Project and associated users deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting project:', err);
+    res.status(500).json({ error: 'Database delete failed.' });
+  }
+});
+
+// 7. Manager Create Field Worker
+app.post('/api/manager/workers', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const { workerName, workerUsername, workerEmail, workerPassword } = req.body;
+  
+  if (!workerName || !workerUsername || !workerEmail || !workerPassword) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  // Assign to manager's first assigned project (for simplicity, assuming 1 project per manager)
+  const assignedProjects = req.user.assignedProjects && req.user.assignedProjects.length > 0 ? req.user.assignedProjects : [];
+  if (assignedProjects.length === 0) {
+    return res.status(403).json({ error: 'You are not assigned to any project.' });
+  }
+
+  try {
+    const existing = await db.query('SELECT username FROM users WHERE username = $1', [workerUsername.trim()]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'Worker username already exists.' });
+    }
+
+    // Insert Worker
+    await db.query(
+      'INSERT INTO users (username, password, email, role, name, status, responsibility, assigned_projects) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [
+        workerUsername.trim(), 
+        workerPassword.trim(), 
+        workerEmail.trim(), 
+        'field', 
+        workerName.trim(), 
+        'active', 
+        'Field Worker', 
+        assignedProjects
+      ]
+    );
+
+    // Send Email
+    const workerHtmlTemplate = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <style>
+        .force-white { background-image: linear-gradient(#ffffff, #ffffff) !important; color: #000000 !important; }
+        .force-orange { color: #ea580c !important; }
+        .force-text { color: #333333 !important; }
+      </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #ffffff;" class="force-white">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 40px 20px;" class="force-white">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="100%" style="max-width: 500px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" cellspacing="0" cellpadding="0" border="0" class="force-white">
+              
+              <!-- Logo / Header -->
+              <tr>
+                <td style="padding-bottom: 32px; text-align: left;">
+                  <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 1px;" class="force-orange">UNNATI</h1>
+                </td>
+              </tr>
+              
+              <!-- Greeting -->
+              <tr>
+                <td style="padding-bottom: 24px; text-align: left;">
+                  <p style="margin: 0; font-size: 16px; font-weight: 400; line-height: 1.5; color: #333333;" class="force-text">
+                    Hello ${workerName},<br><br>
+                    You have been officially added as a Field Worker to project <strong>${assignedProjects[0]}</strong>.
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Credentials Box -->
+              <tr>
+                <td style="padding-bottom: 32px; text-align: left;">
+                  <table role="presentation" width="100%" style="border-left: 3px solid #ea580c; padding-left: 16px;" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td style="padding-bottom: 8px;">
+                        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666666;">Worker ID</span><br>
+                        <strong style="font-size: 16px; color: #000000; font-family: monospace;">${workerUsername}</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666666;">PIN</span><br>
+                        <strong style="font-size: 16px; color: #000000; font-family: monospace;">${workerPassword}</strong>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Action Button -->
+              <tr>
+                <td style="padding-bottom: 40px; text-align: left;">
+                  <a href="http://localhost:4000/login" style="background-image: linear-gradient(#ea580c, #ea580c) !important; color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: 600; font-size: 14px; display: inline-block;">Log in to Mobile App</a>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="border-top: 1px solid #eeeeee; padding-top: 24px; text-align: left;">
+                  <p style="margin: 0; font-size: 12px; color: #999999; line-height: 1.5;">
+                    This is an automated message.<br>Please download the Unnati app to begin tracking.
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+    `;
+
+    await emailService.sendEmail({
+      to: workerEmail.trim(),
+      subject: 'Unnati - Mobile App Credentials',
+      body: `Hello ${workerName},\n\nYou have been added as a field worker to project ${assignedProjects[0]}.\nHere are your mobile app login credentials:\n\nUsername: ${workerUsername}\nPassword: ${workerPassword}\n\nPlease download the Unnati app and log in to begin tracking progress.\n\nBest,\nUnnati Manager`,
+      html: workerHtmlTemplate
+    });
+
+    res.json({ success: true, message: 'Worker created successfully. Credentials emailed.' });
+  } catch (err) {
+    console.error('Error creating worker:', err);
+    res.status(500).json({ error: 'Database transaction failed.' });
+  }
+});
+
+// Fetch workers for manager's project
+app.get('/api/manager/workers', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const assignedProjects = req.user.assignedProjects && req.user.assignedProjects.length > 0 ? req.user.assignedProjects : [];
+  if (assignedProjects.length === 0) {
+    return res.json([]);
+  }
+
+  try {
+    const result = await db.query(
+      "SELECT username, email, name, status, phone, digital_id FROM users WHERE role = 'field' AND $1 && assigned_projects ORDER BY name ASC",
+      [assignedProjects]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching workers:', err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// Update worker status
+app.put('/api/manager/workers/:username/status', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const { username } = req.params;
+  const { status } = req.body;
+  if (!['active', 'paused'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  try {
+    const result = await db.query("UPDATE users SET status = $1 WHERE username = $2 AND role = 'field' RETURNING *", [status, username]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+    res.json({ success: true, message: `Worker status updated to ${status}` });
+  } catch (err) {
+    console.error('Error updating worker status:', err);
+    res.status(500).json({ error: 'Database update failed' });
+  }
+});
+
+// Delete worker
+app.delete('/api/manager/workers/:username', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const { username } = req.params;
+  try {
+    const result = await db.query("DELETE FROM users WHERE username = $1 AND role = 'field' RETURNING *", [username]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+    res.json({ success: true, message: 'Worker deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting worker:', err);
+    res.status(500).json({ error: 'Database delete failed' });
+  }
+});
+
+// Edit worker details
+app.put('/api/manager/workers/:username', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const { username } = req.params;
+  const { name, email, phone, digitalId } = req.body;
+  try {
+    const result = await db.query(
+      "UPDATE users SET name = $1, email = $2, phone = $3, digital_id = $4 WHERE username = $5 AND role = 'field' RETURNING *",
+      [name, email, phone, digitalId, username]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+    res.json({ success: true, message: 'Worker details updated successfully' });
+  } catch (err) {
+    console.error('Error updating worker:', err);
+    res.status(500).json({ error: 'Database update failed' });
+  }
+});
+
+// Get Project Location Settings
+app.get('/api/manager/projects/:id/location', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await db.query('SELECT latitude, longitude, radius FROM projects WHERE id = $1', [id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching project location:', err);
+    res.status(500).json({ error: 'Database fetch failed' });
+  }
+});
+
+// Update Project Location Settings
+app.put('/api/manager/projects/:id/location', authenticateUser, authorize('manager_only'), async (req, res) => {
+  const { id } = req.params;
+  const { latitude, longitude, radius } = req.body;
+  try {
+    await db.query(
+      'UPDATE projects SET latitude = $1, longitude = $2, radius = $3 WHERE id = $4',
+      [latitude, longitude, radius, id]
+    );
+    res.json({ success: true, message: 'Project location settings updated successfully' });
+  } catch (err) {
+    console.error('Error updating project location:', err);
+    res.status(500).json({ error: 'Database update failed' });
+  }
+});
+
+// 5.9 Memory Sources API
+app.get('/api/memory/sources', authenticateUser, async (req, res) => {
+  const pId = req.query.projectId || 'PROJ-1';
+  try {
+    const result = await db.query('SELECT * FROM memory_sources WHERE project_id = $1 ORDER BY uploaded_at DESC', [pId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching memory sources:', err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// 5.6 admin project registry APIs
+app.get('/api/admin/projects', authenticateUser, authorize('admin_only'), async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM projects ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching projects:', err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+app.put('/api/admin/projects/:id/status', authenticateUser, authorize('admin_only'), async (req, res) => {
+  const pId = req.params.id;
+  const { status } = req.body;
+  if (!['active', 'paused', 'deleted'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  try {
+    await db.query('UPDATE projects SET status = $1 WHERE id = $2', [status, pId]);
+    res.json({ success: true, message: `Project ${pId} status updated to ${status}` });
+  } catch (err) {
+    console.error('Error updating project status:', err);
+    res.status(500).json({ error: 'Database update failed' });
+  }
+});
+
+// 5.7 worker assigned project details
 app.get('/api/my-project', authenticateUser, async (req, res) => {
   const assigned = req.user.assignedProjects;
   if (!assigned || assigned.length === 0) {
@@ -789,8 +1492,11 @@ app.get('/api/my-updates', authenticateUser, async (req, res) => {
 });
 
 // 5.8 worker voice upload and match pipeline
-app.post('/api/voice/upload', authenticateUser, upload.single('audio'), async (req, res) => {
-  if (!req.file) {
+app.post('/api/voice/upload', authenticateUser, upload.any(), async (req, res) => {
+  const audioFile = req.files ? req.files.find(f => f.fieldname === 'audio') : null;
+  const photoFile = req.files ? req.files.find(f => f.fieldname === 'photo') : null;
+
+  if (!audioFile) {
     return res.status(400).json({ error: 'Audio file is required' });
   }
 
@@ -810,7 +1516,7 @@ app.post('/api/voice/upload', authenticateUser, upload.single('audio'), async (r
     const projectName = projectResult.rows.length > 0 ? projectResult.rows[0].name : 'OIL Pipeline Expansion';
 
     // 2. Perform speech-to-text transcription
-    let transcript = await geminiService.transcribeAudio(req.file.path, req.file.mimetype);
+    let transcript = await geminiService.transcribeAudio(audioFile.path, audioFile.mimetype);
     
     // Fallbacks
     if (!transcript) {
@@ -873,7 +1579,8 @@ app.post('/api/voice/upload', authenticateUser, upload.single('audio'), async (r
         auditTrail = `No matched activity found in schedule. Flagged for Planner Review.`;
       }
 
-      const relativeAudioPath = `/uploads/${req.file.filename}`;
+      const relativeAudioPath = `/uploads/${audioFile.filename}`;
+      const relativePhotoPath = photoFile ? `/uploads/${photoFile.filename}` : null;
 
       // Save log entry to PostgreSQL
       await db.query(
@@ -881,8 +1588,8 @@ app.post('/api/voice/upload', authenticateUser, upload.single('audio'), async (r
           id, project_id, timestamp, worker_id, source, raw_text, duration_seconds, 
           audio_file_path, waveform_csv, extracted_activity, extracted_date, 
           extracted_discipline, extracted_status, matched_task_id, 
-          matched_task_description, confidence_score, status, audit_trail
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+          matched_task_description, confidence_score, status, audit_trail, photo_file_path
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
         [
           logId,
           pId,
@@ -901,7 +1608,8 @@ app.post('/api/voice/upload', authenticateUser, upload.single('audio'), async (r
           matchedTaskDescription,
           update.confidenceScore,
           status,
-          auditTrail
+          auditTrail,
+          relativePhotoPath
         ]
       );
 
@@ -918,7 +1626,8 @@ app.post('/api/voice/upload', authenticateUser, upload.single('audio'), async (r
         status: status === 'Linked' ? 'APPROVED' : 'PENDING_APPROVAL',
         category: update.discipline || 'Site Progress',
         waveform: waveformCsv.split(',').map(f => parseFloat(f) || 0),
-        audioFilePath: relativeAudioPath
+        audioFilePath: relativeAudioPath,
+        photoFilePath: relativePhotoPath
       });
     }
 
@@ -1086,6 +1795,20 @@ app.post('/api/daily-report/approve', authenticateUser, authorize('confirm_log')
   } catch (err) {
     console.error('Error approving report:', err);
     res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// Reset a specific project's schedule and logs
+app.post('/api/reset-project', async (req, res) => {
+  const { projectId } = req.body;
+  if (!projectId) return res.status(400).json({ error: 'Project ID is required' });
+  try {
+    await db.query('DELETE FROM progress_logs WHERE project_id = $1', [projectId]);
+    await db.query('DELETE FROM schedule_activities WHERE project_id = $1', [projectId]);
+    res.json({ success: true, message: 'Project data erased successfully.' });
+  } catch (err) {
+    console.error('Error resetting project:', err);
+    res.status(500).json({ error: 'Failed to reset project data' });
   }
 });
 

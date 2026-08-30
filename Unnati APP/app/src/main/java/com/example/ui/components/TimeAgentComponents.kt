@@ -83,6 +83,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import java.io.File
 import com.example.audio.RecordingResult
 import com.example.model.Project
 import com.example.model.Worker
@@ -1059,6 +1063,9 @@ fun AudioSubmissionConfirmDialog(
     recordingResult: RecordingResult,
     isPlaying: Boolean,
     playbackProgress: Float,
+    photoFile: File?,
+    onTakePhoto: () -> Unit,
+    onRemovePhoto: () -> Unit,
     onTogglePlay: () -> Unit,
     onConfirmSubmit: () -> Unit,
     onDiscard: () -> Unit,
@@ -1262,6 +1269,85 @@ fun AudioSubmissionConfirmDialog(
                     }
                 }
 
+                // Photo Capture Section (Required)
+                val bitmap = remember(photoFile) {
+                    photoFile?.let { file ->
+                        try {
+                            android.graphics.BitmapFactory.decodeFile(file.absolutePath)?.asImageBitmap()
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                }
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFF8FAFC),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                ) {
+                    if (bitmap != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                bitmap = bitmap,
+                                contentDescription = "Site Photo",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                            
+                            // Close/Delete Photo Button
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp)
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Black.copy(alpha = 0.6f))
+                                    .clickable(onClick = onRemovePhoto),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Remove photo",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = onTakePhoto)
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = null,
+                                tint = UxOrangeDark,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Capture Site Photo (Required)",
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = UxOrangeDark
+                            )
+                        }
+                    }
+                }
+
                 // Operator & Destination Context
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1312,15 +1398,17 @@ fun AudioSubmissionConfirmDialog(
                     }
 
                     // Confirm Submit Button
+                    val isSubmitEnabled = photoFile != null
                     Box(
                         modifier = Modifier
                             .weight(1.3f)
                             .height(44.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(UxOrange)
+                            .background(if (isSubmitEnabled) UxOrange else Color(0xFFCBD5E1))
                             .clickable(
+                                enabled = isSubmitEnabled,
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple(color = Color.White),
+                                indication = if (isSubmitEnabled) ripple(color = Color.White) else null,
                                 onClick = onConfirmSubmit
                             )
                             .testTag("confirm_submit_recording_button"),
@@ -1330,7 +1418,7 @@ fun AudioSubmissionConfirmDialog(
                             text = "Submit Update",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = if (isSubmitEnabled) Color.White else Color(0xFF94A3B8)
                         )
                     }
                 }

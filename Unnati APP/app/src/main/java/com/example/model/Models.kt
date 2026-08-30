@@ -23,7 +23,8 @@ data class Worker(
     val department: String,
     val phoneNumber: String,
     val assignedProjectId: String,
-    val shift: String = "Day Shift (08:00 - 17:00)"
+    val shift: String = "Day Shift (08:00 - 17:00)",
+    val digitalId: String = ""
 )
 
 data class VoiceUpdate(
@@ -40,7 +41,8 @@ data class VoiceUpdate(
     val category: String = "Progress Update",
     val supervisorRemarks: String? = null,
     val audioWaveform: List<Float> = emptyList(),
-    val audioFilePath: String? = null
+    val audioFilePath: String? = null,
+    val photoFilePath: String? = null
 )
 
 data class WorkerStats(

@@ -387,7 +387,7 @@ fun ProfileScreen(
                             Icon(Icons.Default.Badge, contentDescription = null, tint = UxOrangeDark, modifier = Modifier.size(20.dp))
                             Column {
                                 Text("UX4G Digital ID", fontSize = 11.sp, color = UxSecondaryText)
-                                Text("IND-MOPNG-99482", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = UxPrimaryText)
+                                Text(worker.digitalId.ifEmpty { "Not Assigned" }, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = UxPrimaryText)
                             }
                         }
                         Icon(Icons.Default.Verified, contentDescription = null, tint = Color(0xFF16A34A), modifier = Modifier.size(18.dp))

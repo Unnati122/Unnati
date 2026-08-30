@@ -53,6 +53,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -135,6 +136,9 @@ fun TimeAgentApp(
             }
         }
     }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -372,6 +376,8 @@ fun TimeAgentApp(
                             viewModel.login(
                                 workerId = "WK-10245",
                                 pin = "4892",
+                                lat = null,
+                                lon = null,
                                 onSuccess = {
                                     navController.navigate(Screen.Home.route) {
                                         popUpTo(Screen.Landing.route) { inclusive = true }

@@ -23,7 +23,8 @@ data class VoiceUpdateEntity(
     val category: String,
     val supervisorRemarks: String?,
     val waveformCsv: String,
-    val audioFilePath: String? = null
+    val audioFilePath: String? = null,
+    val photoFilePath: String? = null
 ) {
     fun toDomainModel(): VoiceUpdate {
         val parsedWaveform = if (waveformCsv.isNotBlank()) {
@@ -50,7 +51,8 @@ data class VoiceUpdateEntity(
             category = category,
             supervisorRemarks = supervisorRemarks,
             audioWaveform = parsedWaveform,
-            audioFilePath = audioFilePath
+            audioFilePath = audioFilePath,
+            photoFilePath = photoFilePath
         )
     }
 
@@ -70,7 +72,8 @@ data class VoiceUpdateEntity(
                 category = update.category,
                 supervisorRemarks = update.supervisorRemarks,
                 waveformCsv = update.audioWaveform.joinToString(","),
-                audioFilePath = update.audioFilePath
+                audioFilePath = update.audioFilePath,
+                photoFilePath = update.photoFilePath
             )
         }
     }
@@ -115,6 +118,7 @@ data class WorkerEntity(
     val role: String,
     val department: String,
     val phoneNumber: String,
+    val digitalId: String,
     val assignedProjectId: String,
     val shift: String
 ) {
@@ -124,6 +128,7 @@ data class WorkerEntity(
         role = role,
         department = department,
         phoneNumber = phoneNumber,
+        digitalId = digitalId,
         assignedProjectId = assignedProjectId,
         shift = shift
     )
@@ -135,6 +140,7 @@ data class WorkerEntity(
             role = worker.role,
             department = worker.department,
             phoneNumber = worker.phoneNumber,
+            digitalId = worker.digitalId,
             assignedProjectId = worker.assignedProjectId,
             shift = worker.shift
         )

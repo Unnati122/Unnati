@@ -155,8 +155,13 @@
             <h2 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: #1E293B; margin: 0 0 2px 0;">Project Implementation Planner</h2>
             <p style="font-size: 11.5px; color: #64748B; margin: 0;">AI-assisted schedule modeling and action plan alignment.</p>
           </div>
-          <div class="status-indicator online">
-            <span class="dot"></span> Planning Sandbox Active
+          <div class="d-flex align-items-center gap-3">
+            <div class="status-indicator online m-0">
+              <span class="dot"></span> Planning Sandbox Active
+            </div>
+            <button class="btn btn-sm" style="background: #FFF5F5; border: 1px solid #FEE2E2; color: #DC2626; font-size: 11.5px; font-weight: 600;" onclick="deleteCurrentProject()">
+              <i class="fa-solid fa-trash me-1"></i>Reset Project
+            </button>
           </div>
         </div>
 
@@ -344,91 +349,110 @@
                   <p class="mb-0">Please fill in the three steps of parameters on the left and click Generate to preview your government action plan draft.</p>
                 </div>
 
-                <!-- AI Plan Layout View -->
-                <div id="planContent" style="display: none;" class="flex-grow-1 d-flex flex-column">
-                  <ul class="nav nav-tabs nav-tabs-custom mb-3" id="planTabs" role="tablist">
-                    <li class="nav-item">
-                      <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab">Overview &amp; Scope</button>
-                    </li>
-                    <li class="nav-item">
-                      <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tab-tasks" type="button" role="tab">Baseline Tasks</button>
-                    </li>
-                    <li class="nav-item">
-                      <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#tab-timeline" type="button" role="tab">Timeline</button>
-                    </li>
-                    <li class="nav-item">
-                      <button class="nav-link" id="compliance-tab" data-bs-toggle="tab" data-bs-target="#tab-compliance" type="button" role="tab">Risks &amp; Guidelines</button>
-                    </li>
-                  </ul>
+                <!-- AI Plan Layout View (Horizontal Tab Bar & Full Width Content) -->
+                <div id="planContent" class="flex-grow-1 m-0 d-none" style="display: flex; flex-direction: column; width: 100%;">
+                  
+                  <!-- Top: Section Tabs Horizontal Menu (Row Wise) -->
+                  <div class="w-100">
+                    <ul class="nav nav-tabs nav-tabs-custom mb-3" id="planTabs" role="tablist">
+                      <li class="nav-item">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab">Overview &amp; Scope</button>
+                      </li>
+                      <li class="nav-item">
+                        <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tab-tasks" type="button" role="tab">Baseline Tasks</button>
+                      </li>
+                      <li class="nav-item">
+                        <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#tab-timeline" type="button" role="tab">Timeline</button>
+                      </li>
+                      <li class="nav-item">
+                        <button class="nav-link" id="compliance-tab" data-bs-toggle="tab" data-bs-target="#tab-compliance" type="button" role="tab">
+                          <span>Risks &amp; Guidelines</span>
+                          <i class="fa-solid fa-chevron-down text-muted" style="font-size: 11px;"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
 
-                  <div class="tab-content flex-grow-1" id="planTabContents">
-                    
-                    <!-- Overview Tab -->
-                    <div class="tab-pane fade show active" id="tab-overview" role="tabpanel">
-                      <div class="mb-3">
-                        <h6>Executive Summary &amp; Background</h6>
-                        <p id="previewOverview" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+                  <!-- Bottom: Tab Contents Pane (Full Width, Scrollable) -->
+                  <div class="w-100 px-0" style="max-height: 520px; overflow-y: auto;">
+                    <div class="tab-content" id="planTabContents">
+                      
+                      <!-- Overview Tab -->
+                      <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" style="display: block;">
+                        <div class="mb-3">
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Executive Summary &amp; Background</h6>
+                          <p id="previewOverview" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+                        </div>
+                        <div class="mb-3">
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Core Objectives</h6>
+                          <p id="previewObjectives" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+                        </div>
+                        <div class="mb-3">
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Scope of Work</h6>
+                          <p id="previewScope" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+                        </div>
                       </div>
-                      <div class="mb-3">
-                        <h6>Core Objectives</h6>
-                        <p id="previewObjectives" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+
+                      <!-- Tasks Table Tab -->
+                      <div class="tab-pane fade" id="tab-tasks" role="tabpanel" style="display: none;">
+                        <p style="font-size: 12px; color: #64748B;"><i class="fa-solid fa-info-circle me-1"></i> You can edit the task description, discipline, dates, and owners directly in the table cells before approving.</p>
+                        <div class="table-responsive">
+                          <table class="table table-bordered table-sm text-nowrap" id="editableTasksTable">
+                            <thead class="bg-light">
+                              <tr style="font-size: 12px; font-weight: 700; color: #475569;">
+                                <th style="width: 80px;">Task ID</th>
+                                <th>Description</th>
+                                <th style="width: 120px;">Discipline</th>
+                                <th style="width: 100px;">Start Date</th>
+                                <th style="width: 100px;">End Date</th>
+                                <th style="width: 130px;">Owner</th>
+                              </tr>
+                            </thead>
+                            <tbody style="font-size: 13px;">
+                              <!-- Dynamic rows -->
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                      <div class="mb-3">
-                        <h6>Scope of Work</h6>
-                        <p id="previewScope" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+
+                      <!-- Timeline Tab -->
+                      <div class="tab-pane fade" id="tab-timeline" role="tabpanel" style="display: none;">
+                        <div class="mb-4">
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Key Milestones</h6>
+                          <div id="previewMilestones" class="d-flex flex-column gap-2"></div>
+                        </div>
+                        <div class="mb-4">
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Detailed Daily Schedule Breakdown</h6>
+                          <div id="previewDailyTimeline" class="d-flex flex-column gap-2 mt-3"></div>
+                        </div>
+                        <div>
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Implementation Methodology (Week-by-Week)</h6>
+                          <div id="previewWeeks" class="d-flex flex-column gap-3 mt-3"></div>
+                        </div>
                       </div>
+
+                      <!-- Compliance Tab -->
+                      <div class="tab-pane fade" id="tab-compliance" role="tabpanel" style="display: none;">
+                        <div class="mb-4">
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Risk Assessment &amp; Mitigation</h6>
+                          <div id="previewRisks" class="d-flex flex-column gap-2"></div>
+                        </div>
+                        <div>
+                          <h6 style="color: #0A2240; font-weight: 700; font-size: 12.5px;">Guidelines &amp; Site Constraints</h6>
+                          <p id="previewGuidelines" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
+                        </div>
+                      </div>
+
                     </div>
-
-                    <!-- Tasks Table Tab -->
-                    <div class="tab-pane fade" id="tab-tasks" role="tabpanel">
-                      <p style="font-size: 12px; color: #64748B;"><i class="fa-solid fa-info-circle me-1"></i> You can edit the task description, discipline, dates, and owners directly in the table cells before approving.</p>
-                      <div class="table-responsive">
-                        <table class="table table-bordered table-sm text-nowrap" id="editableTasksTable">
-                          <thead class="bg-light">
-                            <tr style="font-size: 12px; font-weight: 700; color: #475569;">
-                              <th style="width: 80px;">Task ID</th>
-                              <th>Description</th>
-                              <th style="width: 120px;">Discipline</th>
-                              <th style="width: 100px;">Start Date</th>
-                              <th style="width: 100px;">End Date</th>
-                              <th style="width: 130px;">Owner</th>
-                            </tr>
-                          </thead>
-                          <tbody style="font-size: 13px;">
-                            <!-- Dynamic rows -->
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <!-- Timeline Tab -->
-                    <div class="tab-pane fade" id="tab-timeline" role="tabpanel">
-                      <div class="mb-4">
-                        <h6>Key Milestones</h6>
-                        <div id="previewMilestones" class="d-flex flex-column gap-2"></div>
-                      </div>
-                      <div>
-                        <h6>Implementation Methodology (Week-by-Week)</h6>
-                        <div id="previewWeeks" class="d-flex flex-column gap-3 mt-3"></div>
-                      </div>
-                    </div>
-
-                    <!-- Compliance Tab -->
-                    <div class="tab-pane fade" id="tab-compliance" role="tabpanel">
-                      <div class="mb-4">
-                        <h6>Risk Assessment &amp; Mitigation</h6>
-                        <div id="previewRisks" class="d-flex flex-column gap-2"></div>
-                      </div>
-                      <div>
-                        <h6>Guidelines &amp; Site Constraints</h6>
-                        <p id="previewGuidelines" class="text-muted" style="font-size: 13.5px; line-height: 1.6;"></p>
-                      </div>
-                    </div>
-
                   </div>
 
                 </div>
 
+              </div>
+              <!-- Card Footer Scroll Hint Indicator -->
+              <div style="border-top: 1px solid #E2E8F0; padding: 10px 0; text-align: center; color: #94A3B8; font-size: 11.5px; font-weight: 500; background: #F8FAFC; display: flex; align-items: center; justify-content: center; gap: 6px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <span>Scroll down to view full plan</span>
+                <i class="fa-solid fa-chevron-down" style="animation: bounce 1.5s infinite; font-size: 10px;"></i>
               </div>
             </div>
           </div>
@@ -454,6 +478,33 @@
       const nextMonth = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
       document.getElementById('startDate').value = today;
       document.getElementById('endDate').value = nextMonth;
+
+      // Lightweight tab switching listener
+      document.querySelectorAll('#planTabs button').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Remove active class from all tabs
+          document.querySelectorAll('#planTabs button').forEach(b => b.classList.remove('active'));
+          
+          // Hide all tab content panes
+          document.querySelectorAll('#planTabContents .tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+            pane.style.display = 'none';
+          });
+          
+          // Add active class to clicked tab
+          button.classList.add('active');
+          
+          // Show target pane
+          const targetId = button.getAttribute('data-bs-target');
+          const targetPane = document.querySelector(targetId);
+          if (targetPane) {
+            targetPane.classList.add('show', 'active');
+            targetPane.style.display = 'block';
+          }
+        });
+      });
     });
 
     window.showWizardStep = function(step) {
@@ -506,7 +557,7 @@
         
         // Show tabs
         document.getElementById('initialPreview').style.display = 'none';
-        document.getElementById('planContent').style.display = 'flex';
+        document.getElementById('planContent').classList.remove('d-none');
         document.getElementById('actionControls').style.display = 'block';
 
         // Render Overview tab details
@@ -520,23 +571,66 @@
         // Render Milestones
         const milesDiv = document.getElementById('previewMilestones');
         milesDiv.innerHTML = result.milestones.map(m => `
-          <div style="background:#F1F5F9; border-left:3px solid var(--gov-primary); padding:10px 14px; border-radius:4px; font-size:13px; display:flex; justify-content:between;">
+          <div style="background:#F1F5F9; border-left:3px solid var(--gov-primary); padding:10px 14px; border-radius:4px; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
             <strong>${m.name}</strong>
             <span class="text-muted"><i class="fa-regular fa-calendar me-1"></i>${m.date}</span>
           </div>
         `).join('');
 
+        // Render Detailed Daily Timeline
+        const dailyDiv = document.getElementById('previewDailyTimeline');
+        if (dailyDiv && result.detailedDailySchedule) {
+          let html = result.detailedDailySchedule.map((item, index) => `
+            <div style="position: relative; padding-left: 20px; border-left: 2px dashed #CBD5E1; padding-bottom: 12px; margin-left: 8px;">
+              <div style="position: absolute; left: -6px; top: 18px; width: 10px; height: 10px; border-radius: 50%; background: var(--gov-primary); border: 2px solid #FFF;"></div>
+              <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="background: rgba(216, 88, 0, 0.08); color: var(--gov-primary); font-size: 11.5px; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
+                    ${item.dayRange}
+                  </div>
+                  <div>
+                    <div style="font-size: 13px; font-weight: 600; color: #1E293B;">${item.activity}</div>
+                    <div style="font-size: 11px; color: #64748B; margin-top: 1px;">Discipline: ${item.discipline}</div>
+                  </div>
+                </div>
+                <div style="background: #F1F5F9; font-size: 10px; font-weight: 700; color: #475569; padding: 2px 8px; border-radius: 20px; text-transform: uppercase;">
+                  Scheduled
+                </div>
+              </div>
+            </div>
+          `).join('');
+          
+          html += `
+            <div style="margin-left: 8px; display: flex; flex-direction: column; align-items: flex-start;">
+              <div style="width: 2px; height: 20px; background-color: transparent; border-left: 2px dashed #CBD5E1; margin-bottom: 2px;"></div>
+              <i class="fa-solid fa-chevron-down" style="color: #94A3B8; font-size: 14px; margin-left: -6px;"></i>
+              <span style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; margin-top: 4px; margin-left: -20px;">Extendable Timeline</span>
+            </div>
+          `;
+          dailyDiv.innerHTML = html;
+        }
+
         // Render Week by week
         const weeksDiv = document.getElementById('previewWeeks');
-        weeksDiv.innerHTML = result.weekByWeekPlan.map(w => `
-          <div style="border-left: 2px solid #E2E8F0; padding-left: 16px; position:relative;">
-            <div style="position:absolute; left:-7px; top:3px; width:12px; height:12px; border-radius:50%; background:var(--gov-primary); border:2px solid #FFF;"></div>
-            <h6 style="margin-bottom:4px; font-weight:700; color:#334155;">${w.week} - ${w.theme}</h6>
-            <ul style="margin:0; padding-left:16px; font-size:12.5px; color:#64748B;">
-              ${w.activities.map(act => `<li>${act}</li>`).join('')}
-            </ul>
-          </div>
-        `).join('');
+        if (weeksDiv && result.weekByWeekPlan) {
+          let wHtml = result.weekByWeekPlan.map(w => `
+            <div style="border-left: 2px solid #E2E8F0; padding-left: 16px; position:relative; padding-bottom: 12px; margin-left: 8px;">
+              <div style="position:absolute; left:-7px; top:3px; width:12px; height:12px; border-radius:50%; background:var(--gov-primary); border:2px solid #FFF;"></div>
+              <h6 style="margin-bottom:4px; font-weight:700; color:#334155;">${w.week} - ${w.theme}</h6>
+              <ul style="margin:0; padding-left:16px; font-size:12.5px; color:#64748B;">
+                ${w.activities.map(act => `<li>${act}</li>`).join('')}
+              </ul>
+            </div>
+          `).join('');
+          wHtml += `
+            <div style="margin-left: 8px; display: flex; flex-direction: column; align-items: flex-start;">
+              <div style="width: 2px; height: 20px; background-color: #E2E8F0; margin-bottom: 2px;"></div>
+              <i class="fa-solid fa-chevron-down" style="color: #94A3B8; font-size: 14px; margin-left: -6px;"></i>
+              <span style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; margin-top: 4px; margin-left: -20px;">Continues as needed</span>
+            </div>
+          `;
+          weeksDiv.innerHTML = wHtml;
+        }
 
         // Render Risks
         const risksDiv = document.getElementById('previewRisks');
@@ -558,23 +652,23 @@
 
       tbody.innerHTML = tasks.map((task, index) => `
         <tr class="task-editable-row" data-index="${index}">
-          <td style="font-weight:700; color:#475569; vertical-align:middle; padding:6px 10px;">
-            <input type="text" class="task-id" value="${task.id}" style="font-weight:700; width:80px;" readonly>
+          <td style="vertical-align:middle; padding:4px 6px;">
+            <input type="text" class="task-id table-input" value="${task.id}" readonly>
           </td>
-          <td>
-            <input type="text" class="task-desc" value="${task.description || task.activity}">
+          <td style="vertical-align:middle; padding:4px 6px;">
+            <input type="text" class="task-desc table-input" value="${task.description || task.activity}">
           </td>
-          <td>
-            <input type="text" class="task-disc" value="${task.discipline}">
+          <td style="vertical-align:middle; padding:4px 6px;">
+            <input type="text" class="task-disc table-input" value="${task.discipline}">
           </td>
-          <td>
-            <input type="date" class="task-start" value="${task.plannedStart}">
+          <td style="vertical-align:middle; padding:4px 6px;">
+            <input type="date" class="task-start table-input" value="${task.plannedStart}">
           </td>
-          <td>
-            <input type="date" class="task-end" value="${task.plannedEnd}">
+          <td style="vertical-align:middle; padding:4px 6px;">
+            <input type="date" class="task-end table-input" value="${task.plannedEnd}">
           </td>
-          <td>
-            <input type="text" class="task-owner" value="${task.owner}">
+          <td style="vertical-align:middle; padding:4px 6px;">
+            <input type="text" class="task-owner table-input" value="${task.owner}">
           </td>
         </tr>
       `).join('');
@@ -596,32 +690,106 @@
       return updated;
     }
 
+    function showCustomConfirm(message, onConfirm) {
+      const existing = document.getElementById('unnati-confirm-modal');
+      if (existing) existing.remove();
+
+      const modalHtml = `
+        <div id="unnati-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 99999; animation: fadeIn 0.2s ease-out;">
+          <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); width: 100%; max-width: 440px; overflow: hidden; transform: scale(0.95); animation: scaleIn 0.2s forwards; border-top: 4px solid var(--gov-primary); text-align: left;">
+            <div style="padding: 24px;">
+              <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px;">
+                <div style="background: rgba(216, 88, 0, 0.1); color: var(--gov-primary); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <i class="fa-solid fa-circle-question" style="font-size: 20px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: #1E293B; margin: 0 0 6px 0;">Confirm Action</h4>
+                  <p style="font-size: 13.5px; color: #64748B; margin: 0; line-height: 1.5;">${message}</p>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
+                <button id="confirm-btn-cancel" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #64748B; font-weight: 600; font-size: 12.5px; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif;">Cancel</button>
+                <button id="confirm-btn-ok" style="background: var(--gov-primary); border: none; color: #FFFFFF; font-weight: 600; font-size: 12.5px; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif;">Approve &amp; Sync</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      document.getElementById('confirm-btn-cancel').onclick = () => {
+        document.getElementById('unnati-confirm-modal').remove();
+      };
+
+      document.getElementById('confirm-btn-ok').onclick = () => {
+        document.getElementById('unnati-confirm-modal').remove();
+        if (onConfirm) onConfirm();
+      };
+    }
+
+    function showCustomAlert(message, onOk) {
+      const existing = document.getElementById('unnati-alert-modal');
+      if (existing) existing.remove();
+
+      const modalHtml = `
+        <div id="unnati-alert-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 99999; animation: fadeIn 0.2s ease-out;">
+          <div style="background: #FFFFFF; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); width: 100%; max-width: 440px; overflow: hidden; transform: scale(0.95); animation: scaleIn 0.2s forwards; border-top: 4px solid #10B981; text-align: left;">
+            <div style="padding: 24px;">
+              <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px;">
+                <div style="background: rgba(16, 185, 129, 0.1); color: #10B981; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <i class="fa-solid fa-circle-check" style="font-size: 20px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: #1E293B; margin: 0 0 6px 0;">Notification</h4>
+                  <p style="font-size: 13.5px; color: #64748B; margin: 0; line-height: 1.5;">${message}</p>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 16px;">
+                <button id="alert-btn-ok" style="background: #10B981; border: none; color: #FFFFFF; font-weight: 600; font-size: 12.5px; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; min-width: 80px;">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      document.getElementById('alert-btn-ok').onclick = () => {
+        document.getElementById('unnati-alert-modal').remove();
+        if (onOk) onOk();
+      };
+    }
+
     async function approvePlan() {
       if (!currentDraftPlan) return;
       
       const updatedTasks = getUpdatedTasks();
       const pId = localStorage.getItem('selectedProjectId') || 'PROJ-1';
 
-      if (!confirm('Are you sure you want to approve and apply this Project Plan? This will populate the master schedule and reset previous progress logs for this project.')) {
-        return;
-      }
+      showCustomConfirm(
+        'Are you sure you want to approve and apply this Project Plan? This will populate the master schedule and reset previous progress logs for this project.',
+        async () => {
+          const result = await fetchAPI('/api/approve-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              projectId: pId,
+              tasks: updatedTasks,
+              overview: currentDraftPlan.overview
+            })
+          });
 
-      const result = await fetchAPI('/api/approve-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectId: pId,
-          tasks: updatedTasks,
-          overview: currentDraftPlan.overview
-        })
-      });
-
-      if (result && result.success) {
-        alert('Success! The project implementation plan has been approved. ' + result.taskCount + ' baseline tasks successfully synchronized to the schedule.');
-        window.location.href = 'schedule.html';
-      } else {
-        alert('Failed to approve project plan. Please try again.');
-      }
+          if (result && result.success) {
+            showCustomAlert(
+              `Success! The project implementation plan has been approved. ${result.taskCount} baseline tasks successfully synchronized to the schedule.`,
+              () => { window.location.href = 'schedule.html'; }
+            );
+          } else {
+            showCustomAlert('Failed to approve project plan. Please try again.');
+          }
+        }
+      );
     }
 
     function exportPDF() {
@@ -633,12 +801,27 @@
       const pName = document.getElementById('projectName').value;
       const pOwner = document.getElementById('owner').value;
       
+      // Helper: Page decorations (header/footer) on regular pages
+      const addPageDecorations = (pageNumber) => {
+        doc.setFillColor(10, 34, 64); // Navy blue top accent bar
+        doc.rect(0, 0, 210, 6, 'F');
+        
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text("OIL INDIA LIMITED  |  UNNATI AI PLANNER", 20, 14);
+        doc.text(`Page ${pageNumber}`, 190, 14, { align: "right" });
+        
+        doc.setFillColor(226, 232, 240);
+        doc.rect(20, 16, 170, 0.5, 'F');
+      };
+      
       // Page 1: Cover Page
       doc.setFillColor(250, 250, 250);
       doc.rect(0, 0, 210, 297, 'F');
       
-      // Decorative top bar
-      doc.setFillColor(249, 115, 22);
+      // Decorative top bar (Saffron accent)
+      doc.setFillColor(216, 88, 0);
       doc.rect(0, 0, 210, 15, 'F');
       
       doc.setFont("Helvetica", "bold");
@@ -646,16 +829,17 @@
       doc.setTextColor(30, 41, 59);
       doc.text("OIL INDIA LIMITED", 105, 50, { align: "center" });
       
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setFont("Helvetica", "normal");
-      doc.text("GOVERNMENT OF INDIA UNDERTAKING", 105, 57, { align: "center" });
+      doc.setTextColor(71, 85, 105);
+      doc.text("A Government of India Undertaking", 105, 57, { align: "center" });
       
       doc.setFillColor(226, 232, 240);
       doc.rect(20, 75, 170, 1, 'F');
       
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(18);
-      doc.setTextColor(234, 88, 12);
+      doc.setFontSize(20);
+      doc.setTextColor(216, 88, 0);
       doc.text("PROJECT IMPLEMENTATION ACTION PLAN", 105, 95, { align: "center" });
       
       doc.setFont("Helvetica", "bold");
@@ -668,6 +852,7 @@
       // Info box
       doc.setFontSize(10);
       doc.setFont("Helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
       doc.text("PROJECT OWNER / TEAM:", 30, 160);
       doc.setFont("Helvetica", "normal");
       doc.text(pOwner, 90, 160);
@@ -698,118 +883,180 @@
       doc.text("This document is generated by the Oil India UNNATI System.", 105, 260, { align: "center" });
       doc.text("It is a baseline reference plan and does not constitute a legally binding government form.", 105, 266, { align: "center" });
 
-      // Page 2: Summary & Scope
+      // Page 2: Summary, Objectives, Scope & Schedule (FLOWING DESIGN)
       doc.addPage();
-      doc.setFillColor(249, 115, 22);
-      doc.rect(0, 0, 210, 6, 'F');
+      addPageDecorations(2);
       
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(15, 23, 42);
-      doc.text("1. Executive Summary & Objectives", 20, 25);
+      doc.setFontSize(13);
+      doc.setTextColor(10, 34, 64);
+      doc.text("1. Executive Summary & Objectives", 20, 28);
       
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setTextColor(51, 65, 85);
       
       const splitOverview = doc.splitTextToSize(currentDraftPlan.overview, 170);
-      doc.text(splitOverview, 20, 35);
+      doc.text(splitOverview, 20, 36);
       
-      const nextY = 35 + (splitOverview.length * 5) + 10;
+      const nextY = 36 + (splitOverview.length * 5) + 6;
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(12);
-      doc.text("Objectives:", 20, nextY);
+      doc.setFontSize(10.5);
+      doc.setTextColor(10, 34, 64);
+      doc.text("Objectives & Purpose:", 20, nextY);
       
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
+      doc.setTextColor(51, 65, 85);
       const splitObj = doc.splitTextToSize(currentDraftPlan.objectives, 170);
-      doc.text(splitObj, 20, nextY + 7);
+      doc.text(splitObj, 20, nextY + 6);
       
-      const nextY2 = nextY + 7 + (splitObj.length * 5) + 10;
+      const nextY2 = nextY + 6 + (splitObj.length * 5) + 6;
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
+      doc.setFontSize(13);
+      doc.setTextColor(10, 34, 64);
       doc.text("2. Scope of Work", 20, nextY2);
       
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
+      doc.setTextColor(51, 65, 85);
       const splitScope = doc.splitTextToSize(currentDraftPlan.scope, 170);
-      doc.text(splitScope, 20, nextY2 + 10);
+      doc.text(splitScope, 20, nextY2 + 7);
       
-      // Page 3: Task List table
-      doc.addPage();
-      doc.setFillColor(249, 115, 22);
-      doc.rect(0, 0, 210, 6, 'F');
+      const nextY3 = nextY2 + 7 + (splitScope.length * 5) + 8;
       
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(15, 23, 42);
-      doc.text("3. Baseline Implementation Schedule", 20, 25);
+      doc.setFontSize(13);
+      doc.setTextColor(10, 34, 64);
+      doc.text("3. Baseline Implementation Schedule (Daily Breakdown)", 20, nextY3);
       
       const tableBody = updatedTasks.map(t => [t.id, t.description, t.discipline, t.plannedStart, t.plannedEnd, t.owner]);
       
       doc.autoTable({
         head: [['ID', 'Task Description', 'Discipline', 'Start', 'End', 'Owner']],
         body: tableBody,
-        startY: 32,
+        startY: nextY3 + 4,
+        margin: { left: 20, right: 20 },
         theme: 'striped',
-        headStyles: { fillColor: [249, 115, 22] },
-        styles: { fontSize: 9 }
+        headStyles: { fillColor: [10, 34, 64] },
+        styles: { fontSize: 8.5, cellPadding: 3 },
+        didDrawPage: function (data) {
+          // If autoTable overflows and adds pages, decorate them properly!
+          if (data.pageNumber > 2) {
+            addPageDecorations(data.pageNumber);
+          }
+        }
       });
       
-      // Page 4: Risks & Approvals
-      const finalY = doc.lastAutoTable.finalY + 15;
-      let approveDoc = doc;
+      // Page for Risks & Approvals
+      const finalY = doc.lastAutoTable.finalY + 12;
       let appY = finalY;
-      if (finalY > 180) {
+      
+      // Ensure we don't start sign-off block too close to page end (leave at least 95mm)
+      if (finalY > 200) {
         doc.addPage();
-        doc.setFillColor(249, 115, 22);
-        doc.rect(0, 0, 210, 6, 'F');
-        appY = 25;
+        const newPageNum = doc.internal.getNumberOfPages();
+        addPageDecorations(newPageNum);
+        appY = 28;
       }
       
-      approveDoc.setFont("Helvetica", "bold");
-      approveDoc.setFontSize(14);
-      approveDoc.setTextColor(15, 23, 42);
-      approveDoc.text("4. Implementation Risks & Guidelines", 20, appY);
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(10, 34, 64);
+      doc.text("4. Implementation Risks & Guidelines", 20, appY);
       
-      approveDoc.setFont("Helvetica", "bold");
-      approveDoc.setFontSize(10);
-      approveDoc.text("Key Identified Risks:", 20, appY + 10);
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("Key Identified Risks & Mitigation Plans:", 20, appY + 8);
       
-      approveDoc.setFont("Helvetica", "normal");
-      let riskOffset = appY + 17;
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(51, 65, 85);
+      let riskOffset = appY + 15;
       currentDraftPlan.risks.forEach((r, i) => {
-        approveDoc.text(`${i+1}. Risk: ${r.risk}`, 25, riskOffset);
-        approveDoc.text(`   Mitigation: ${r.mitigation}`, 25, riskOffset + 5);
-        riskOffset += 12;
+        doc.text(`${i+1}. Risk: ${r.risk}`, 22, riskOffset);
+        doc.text(`   Mitigation Strategy: ${r.mitigation}`, 22, riskOffset + 5);
+        riskOffset += 11;
       });
       
-      // Sign-off
-      const sigY = riskOffset + 15;
-      approveDoc.rect(20, sigY, 170, 1, 'F');
+      // Sign-off section
+      const sigY = riskOffset + 10;
+      let actionSigY = sigY;
       
-      approveDoc.setFont("Helvetica", "bold");
-      approveDoc.setFontSize(12);
-      approveDoc.text("5. Project Sign-Off and Approvals", 20, sigY + 12);
+      // Check if sign-off fits on this page, else push to next
+      if (sigY > 230) {
+        doc.addPage();
+        const newPageNum = doc.internal.getNumberOfPages();
+        addPageDecorations(newPageNum);
+        actionSigY = 28;
+      }
       
-      approveDoc.setFont("Helvetica", "normal");
-      approveDoc.setFontSize(9);
-      approveDoc.text("By signing below, the representative parties acknowledge and authorize this baseline schedule:", 20, sigY + 18);
+      doc.setFillColor(226, 232, 240);
+      doc.rect(20, actionSigY, 170, 0.5, 'F');
       
-      const sigLineY = sigY + 45;
-      approveDoc.text("__________________________", 25, sigLineY);
-      approveDoc.text("Site Manager (OIL)", 25, sigLineY + 5);
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(10, 34, 64);
+      doc.text("5. Project Sign-Off and Approvals", 20, actionSigY + 10);
       
-      approveDoc.text("__________________________", 115, sigLineY);
-      approveDoc.text("Planning Lead (OIL)", 115, sigLineY + 5);
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text("By signing below, the representative parties acknowledge and authorize this daily baseline schedule:", 20, actionSigY + 15);
       
-      approveDoc.text("__________________________", 25, sigLineY + 25);
-      approveDoc.text("HSE Assurance Officer", 25, sigLineY + 30);
+      const sigLineY = actionSigY + 38;
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 41, 59);
       
-      approveDoc.text("__________________________", 115, sigLineY + 25);
-      approveDoc.text("Government Approving Director", 115, sigLineY + 30);
-
+      doc.text("__________________________", 25, sigLineY);
+      doc.text("Site Manager (OIL)", 25, sigLineY + 5);
+      
+      doc.text("__________________________", 115, sigLineY);
+      doc.text("Planning Lead (OIL)", 115, sigLineY + 5);
+      
+      doc.text("__________________________", 25, sigLineY + 22);
+      doc.text("HSE Assurance Officer", 25, sigLineY + 27);
+      
+      doc.text("__________________________", 115, sigLineY + 22);
+      doc.text("Government Approving Director", 115, sigLineY + 27);
+ 
       doc.save(`Implementation_Plan_${pName.replace(/\s+/g, '_')}.pdf`);
+    }
+
+    async function deleteCurrentProject() {
+      // First ask user to confirm deletion
+      window.showConfirmModal("Are you sure you want to completely erase the current project from the database? This action is irreversible.", async () => {
+        try {
+          // If no plan is generated, just reset the UI state
+          if (!window.currentPlanData || !window.currentPlanData.projectId) {
+            window.showConfirmModal("No active project loaded in the sandbox. Would you like to clear the form fields?", () => {
+              document.getElementById('planForm').reset();
+              document.getElementById('planResult').classList.add('d-none');
+            }, "Clear Form");
+            return;
+          }
+          
+          const projectId = window.currentPlanData.projectId;
+          const response = await fetch('/api/reset-project', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectId })
+          });
+          
+          const result = await response.json();
+          if (result.success) {
+            window.showAlertModal("Project data erased successfully. The dashboard will now reload.");
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            window.showAlertModal("Error erasing project data: " + result.error);
+          }
+        } catch (error) {
+          console.error("Error calling reset project API:", error);
+          window.showAlertModal("A network error occurred while trying to erase the project.");
+        }
+      }, "Erase Project");
     }
   </script>
 </body>

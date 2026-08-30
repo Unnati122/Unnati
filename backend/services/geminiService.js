@@ -151,7 +151,6 @@ function runLocalMockExtraction(rawText, baselineTasks) {
 
   for (const sentence of sentences) {
     const sLower = sentence.toLowerCase();
-    let matched = false;
 
     for (const kw of keywords) {
       if (sLower.includes(kw.key)) {
@@ -174,22 +173,8 @@ function runLocalMockExtraction(rawText, baselineTasks) {
           confidenceScore: 0.88,
           reasoning: `Matched via mock heuristic keyword: "${kw.key}"`
         });
-        matched = true;
         break;
       }
-    }
-
-    if (!matched && sentence.length > 5) {
-      // Flagged as pending review
-      extractedUpdates.push({
-        activity: sentence,
-        date: new Date().toISOString().split('T')[0],
-        discipline: 'Unassigned',
-        status: 'In Progress',
-        matchedTaskId: null,
-        confidenceScore: 0.35,
-        reasoning: 'No keyword triggers found in mock database. Flagged for review.'
-      });
     }
   }
 
@@ -262,6 +247,9 @@ Return the response ONLY as a valid JSON object matching this schema (do not inc
   "weekByWeekPlan": [
     { "week": "Week 1", "theme": "Preparation...", "activities": ["Activity 1", "Activity 2"] }
   ],
+  "detailedDailySchedule": [
+    { "dayRange": "Day 1-5", "activity": "Activity description...", "discipline": "Civil/IT/etc." }
+  ],
   "tasks": [
     { "id": "TASK-001", "description": "Task description...", "discipline": "Civil/Mechanical/Piping/etc.", "plannedStart": "YYYY-MM-DD", "plannedEnd": "YYYY-MM-DD", "durationDays": 10, "dependencies": "None", "owner": "Owner..." }
   ],
@@ -294,6 +282,7 @@ function generateMockProjectPlan(details) {
   const formatDate = (date) => date.toISOString().split('T')[0];
   const pName = details.projectName || 'Infrastructure Project';
   const owner = details.owner || 'Planning Team';
+  const desc = ((details.description || '') + ' ' + (details.projectName || '') + ' ' + (details.scope || '')).toLowerCase();
   
   const addDays = (date, days) => {
     const result = new Date(date);
@@ -301,122 +290,201 @@ function generateMockProjectPlan(details) {
     return result;
   };
 
-  const tasks = [
-    {
-      "id": "TSK-101",
-      "description": "Right of Way (ROW) Clearing and Preparations",
-      "discipline": "Civil",
-      "plannedStart": formatDate(start),
-      "plannedEnd": formatDate(addDays(start, Math.floor(diffDays * 0.15))),
-      "durationDays": Math.floor(diffDays * 0.15),
-      "dependencies": "None",
-      "owner": owner
-    },
-    {
-      "id": "TSK-102",
-      "description": "Trenching and Foundation Excavation",
-      "discipline": "Civil",
-      "plannedStart": formatDate(addDays(start, Math.floor(diffDays * 0.15))),
-      "plannedEnd": formatDate(addDays(start, Math.floor(diffDays * 0.35))),
-      "durationDays": Math.floor(diffDays * 0.20),
-      "dependencies": "TSK-101",
-      "owner": owner
-    },
-    {
-      "id": "TSK-201",
-      "description": "Material Handling and Stringing",
-      "discipline": "Piping",
-      "plannedStart": formatDate(addDays(start, Math.floor(diffDays * 0.30))),
-      "plannedEnd": formatDate(addDays(start, Math.floor(diffDays * 0.55))),
-      "durationDays": Math.floor(diffDays * 0.25),
-      "dependencies": "TSK-102",
-      "owner": "Logistics Team"
-    },
-    {
-      "id": "TSK-301",
-      "description": "Mainline Fitting and Welding",
-      "discipline": "Mechanical",
-      "plannedStart": formatDate(addDays(start, Math.floor(diffDays * 0.50))),
-      "plannedEnd": formatDate(addDays(start, Math.floor(diffDays * 0.75))),
-      "durationDays": Math.floor(diffDays * 0.25),
-      "dependencies": "TSK-201",
-      "owner": "Fabrication Crew"
-    },
-    {
-      "id": "TSK-401",
-      "description": "Quality Inspections and Non-Destructive Testing (NDT)",
-      "discipline": "Quality/HSE",
-      "plannedStart": formatDate(addDays(start, Math.floor(diffDays * 0.70))),
-      "plannedEnd": formatDate(addDays(start, Math.floor(diffDays * 0.85))),
-      "durationDays": Math.floor(diffDays * 0.15),
-      "dependencies": "TSK-301",
-      "owner": "Q/C Inspectors"
-    },
-    {
-      "id": "TSK-501",
-      "description": "Pre-commissioning Hydrotesting and Joint Coating",
-      "discipline": "Commissioning",
-      "plannedStart": formatDate(addDays(start, Math.floor(diffDays * 0.82))),
-      "plannedEnd": formatDate(end),
-      "durationDays": Math.max(5, diffDays - Math.floor(diffDays * 0.82)),
-      "dependencies": "TSK-401",
-      "owner": "Commissioning Lead"
-    }
+  const itActivities = [
+    "Define Project Objectives & Core Scope",
+    "Conduct User Persona Studies & Workflows",
+    "Finalize Wireframes & UI Design Concept",
+    "UI/UX Design Review & Client Sign-off",
+    "Project Repo Setup & CI/CD Pipeline Config",
+    "Design PostgreSQL Database Schema",
+    "Setup Express Server & Initial API Routes",
+    "User Authentication REST API Implementation",
+    "Authentication Integration with SQLite/Web",
+    "Dashboard Landing Screen Layout & CSS",
+    "User Profiles & Settings Frontend Dev",
+    "Media Upload Endpoint & Multer Storage",
+    "Camera Capture & Preview Integration",
+    "Offline Storage Engine & Local Cache Setup",
+    "Automatic Sync Queue & Worker Engine",
+    "Supervisor Approval Web Interface Layout",
+    "Web Dashboard Analytics Metrics Charts",
+    "Backend Route Unit Tests Verification",
+    "Frontend UI Component Regression Checks",
+    "Manual App Sandbox Testing on Devices",
+    "Production Cloud Environment Deployment",
+    "Beta Build Compilation & APK Release",
+    "Pre-Launch Safety & Penetration Checks",
+    "Database Performance & Index Optimization",
+    "API SSL Handshake & HTTPS Configuration",
+    "Complete System Integration Review",
+    "User Guide Documentation & Readme Final",
+    "App Store/Play Store Listing Submission",
+    "System Handover & Administrator Training",
+    "Project Completion Sign-off & Retrospective"
   ];
 
-  const milestones = (details.milestones && details.milestones.length > 0)
-    ? details.milestones.map((m, idx) => ({ "name": m, "date": formatDate(addDays(start, Math.floor(diffDays * (idx + 1) / (details.milestones.length + 1)))) }))
-    : [
-        { "name": "Civil Foundations Completed", "date": formatDate(addDays(start, Math.floor(diffDays * 0.35))) },
-        { "name": "Mechanical Erection Completed", "date": formatDate(addDays(start, Math.floor(diffDays * 0.75))) },
-        { "name": "Pre-Commissioning Sign-off", "date": formatDate(addDays(start, Math.floor(diffDays * 0.90))) },
-        { "name": "Project Completion Certificate", "date": formatDate(end) }
-      ];
+  const civilActivities = [
+    "Site Mobilization & Excavator Setup",
+    "Topographical Survey & Route Staking",
+    "Right-of-Way Clearing & Levelling",
+    "Civil Equipment Safety Pre-Checks",
+    "Excavator Position & Staging Area Setup",
+    "Trenching Segment 1 Excavation (0-200m)",
+    "Trenching Segment 2 Excavation (200-400m)",
+    "Soil Stability & Slope Clearance Inspection",
+    "Pipe Hauling & Joint Distribution",
+    "Pipe Stringing Along Trench Profile",
+    "Line Pipe Internal Cleaning & Inspection",
+    "Fit-up Clamping & Tack Welding Segment 1",
+    "Mainline Root-Pass Welding Segment 1",
+    "Hot-Pass Welding & Slag Removal Segment 1",
+    "Filler & Cap Welding Completion Segment 1",
+    "Non-Destructive Radiography (NDT) Checks",
+    "NDT Review & Weld Defect Repairs",
+    "Joint Coating Sandblasting & Pre-heat",
+    "Polyurethane Joint Coating Application",
+    "Holiday Spark Leak Detection Checking",
+    "Trench Bottom Padding Sand Laying",
+    "Lowering-in Pipe Segment with Sidebooms",
+    "Line Tie-in Welding & Joint Inspection",
+    "Trench Backfilling & Soil Compaction",
+    "ROW Restoration & Surface Levelling",
+    "Hydrotesting Manifold Setup & Water Filling",
+    "Hydrostatic Strength Testing Pressurization",
+    "Pressure Hold Leakage Check Verification",
+    "Pipeline Dewatering & Nitrogen Purging",
+    "Cathodic Protection Commissioning & Handover"
+  ];
 
-  const weekByWeekPlan = [];
-  const totalWeeks = Math.ceil(diffDays / 7);
-  for (let w = 1; w <= totalWeeks; w++) {
-    let theme = "Construction & Execution Phase";
-    let acts = [];
-    if (w <= Math.ceil(totalWeeks * 0.2)) {
-      theme = "Phase 1: Mobilization and Civil Groundworks";
-      acts = ["Right of Way clearance and site levelling", "Mobilization of civil equipment and excavation crew"];
-    } else if (w <= Math.ceil(totalWeeks * 0.55)) {
-      theme = "Phase 2: Pipe Laying & Mechanical Alignment";
-      acts = ["Hauling pipes to site nodes", "Positioning, stringing, and initial welding passes"];
-    } else if (w <= Math.ceil(totalWeeks * 0.85)) {
-      theme = "Phase 3: Radiography (NDT) & Tie-ins";
-      acts = ["Joint radiography testing and NDT inspections", "Joint coating application and lowering-in"];
-    } else {
-      theme = "Phase 4: Commissioning & Handover";
-      acts = ["Pipeline hydrostatic testing and pressure checks", "Final safety audit and signing off clearance certificates"];
+  const genericActivities = [
+    "Kickoff Meeting & Stakeholder Onboarding",
+    "Detailed Work Breakdown Structure Draft",
+    "Resource Allocation & Mobilization",
+    "Baseline Schedule Setup & Sign-off",
+    "Procurement List Approval & Purchase Orders",
+    "Material Dispatch & Transit Tracking",
+    "Site Delivery & Inventory Verification",
+    "Technical Design Review & Specifications",
+    "Infrastructure Staging & Base Foundations",
+    "Core Installation Phase 1 Execution",
+    "Core Installation Phase 2 Execution",
+    "Core Installation Phase 3 Execution",
+    "Mid-Project Review & Timeline Alignment",
+    "Equipment Integration & Connections Setup",
+    "System Configuration & Calibration",
+    "Internal Quality Checks & Punchlist",
+    "Defect Rectification & Clean-up",
+    "Safety Assurance Audits & Clearances",
+    "Standard Operating Procedures (SOP) Draft",
+    "Integration Verification & Sandbox Run",
+    "User Acceptance Testing (UAT) Onboarding",
+    "UAT Execution & Client Feedback Capture",
+    "Post-UAT Fixes & Layout Polishing",
+    "System Performance Optimization Checks",
+    "Security Review & Credentials Handoff",
+    "User Training Sessions & Workshop Run",
+    "As-built Drawings Documentation Compile",
+    "Official Inspection & Regulatory Clearance",
+    "Final Handover Certificate Signing",
+    "Project Review Meeting & Closeout"
+  ];
+
+  // Pick template array
+  let sourceActivities = genericActivities;
+  let discipline = "Management";
+  if (desc.includes('app') || desc.includes('mobile') || desc.includes('software') || desc.includes('website') || desc.includes('it') || desc.includes('system') || desc.includes('develop') || desc.includes('code')) {
+    sourceActivities = itActivities;
+    discipline = "IT/Development";
+  } else if (desc.includes('road') || desc.includes('bridge') || desc.includes('building') || desc.includes('construction') || desc.includes('civil') || desc.includes('earth') || desc.includes('pipe') || desc.includes('line')) {
+    sourceActivities = civilActivities;
+    discipline = "Civil";
+  }
+
+  // Generate strictly DAILY tasks (1 task per calendar day, duration = 1 day each)
+  const numTasks = Math.min(diffDays, 30);
+  const tasks = [];
+  for (let i = 0; i < numTasks; i++) {
+    const taskDate = addDays(start, i);
+    const dateStr = formatDate(taskDate);
+    const activityDesc = sourceActivities[i] || `Project Execution Task Phase ${i+1}`;
+    
+    // Assign smart discipline based on index
+    let taskDisc = discipline;
+    if (discipline === "IT/Development") {
+      if (i < 4) taskDisc = "IT/Design";
+      else if (i === 5) taskDisc = "IT/Database";
+      else if (i > 24) taskDisc = "Management";
+      else if (i > 20) taskDisc = "Quality/HSE";
+    } else if (discipline === "Civil") {
+      if (i > 27) taskDisc = "Commissioning";
+      else if (i > 14 && i < 18) taskDisc = "Quality/HSE";
+      else if (i >= 11 && i <= 14) taskDisc = "Mechanical/Piping";
     }
-    weekByWeekPlan.push({
-      "week": `Week ${w}`,
-      "theme": theme,
-      "activities": acts
+
+    tasks.push({
+      id: `TSK-10${i+1 > 9 ? i+1 : '0' + (i+1)}`,
+      description: activityDesc,
+      discipline: taskDisc,
+      plannedStart: dateStr,
+      plannedEnd: dateStr,
+      durationDays: 1,
+      dependencies: i === 0 ? "None" : `TSK-10${i > 9 ? i : '0' + i}`,
+      owner: owner
     });
   }
+
+  const weekByWeekPlan = [];
+  const totalWeeks = Math.ceil(diffDays / 7) || 12;
+
+  for (let w = 1; w <= totalWeeks; w++) {
+    const currentTaskIndex = Math.min(tasks.length - 1, Math.floor((w - 1) / (totalWeeks / tasks.length)));
+    const activeTask = tasks[currentTaskIndex];
+    weekByWeekPlan.push({
+      week: `Week ${w}`,
+      theme: activeTask ? `${activeTask.description.substring(0, 30)}...` : 'Execution Focus',
+      activities: [
+        activeTask ? `Active execution of ${activeTask.description}` : 'General site progress tracking',
+        `Perform quality check matching discipline ${activeTask ? activeTask.discipline : 'General'}`
+      ]
+    });
+  }
+
+  const milestones = [
+    { name: "Project Kickoff", date: formatDate(start) },
+    { name: "Mid-Term Review & Intermediate Clearance", date: formatDate(addDays(start, Math.floor(diffDays / 2))) },
+    { name: "Final Handover & Commissioning Approval", date: formatDate(end) }
+  ];
+
+  const detailedDailySchedule = tasks.map(t => {
+    const startOffset = Math.ceil((new Date(t.plannedStart) - start) / (1000 * 60 * 60 * 24)) + 1;
+    const endOffset = Math.ceil((new Date(t.plannedEnd) - start) / (1000 * 60 * 60 * 24)) + 1;
+    const dayRange = startOffset === endOffset ? `Day ${startOffset}` : `Day ${startOffset}-${endOffset}`;
+    return {
+      dayRange: dayRange,
+      activity: t.description,
+      discipline: t.discipline
+    };
+  });
 
   return {
     "overview": details.description || `This plan outlines the structured implementation methodology for the ${pName} project under the directive of Oil India Limited.`,
     "objectives": details.objectives || "Ensure the seamless completion of designated works within the baseline timeline while strictly adhering to safety regulations.",
-    "scope": details.scope || "The complete execution of site works including civil preparation, mechanical installation, quality inspections, and final commissioning.",
+    "scope": details.scope || "The complete execution of site works including preparation, mechanical installation, quality inspections, and final commissioning.",
     "milestones": milestones,
     "weekByWeekPlan": weekByWeekPlan,
+    "detailedDailySchedule": detailedDailySchedule,
     "tasks": tasks,
     "deliverables": [
       "Completed and certified installations",
-      "Radiography & NDT quality logbooks",
-      "Hydrotesting compliance records",
-      "As-built safety clearances & approvals"
+      "Quality compliance record books",
+      "Safety clearances & approvals"
     ],
-    "reportingStructure": `Structured reporting to occur at a ${details.reportingFrequency || 'Daily'} frequency. Supervisor is required to submit digital reports through the UNNATI portal.`,
+    "reportingStructure": `Structured reporting to occur at a ${details.reportingFrequency || 'Daily'} frequency. Responsible owner is ${owner}.`,
     "risks": [
-      { "risk": "Monsoon disruptions/weather delay", "mitigation": "Incorporate contingency weather days into schedule margins" },
-      { "risk": "Material logistics supply bottlenecks", "mitigation": "Pre-stage critical equipment and valves at onsite warehouse yards" }
+      { "risk": "Logistics bottlenecks / resource constraints", "mitigation": "Establish secondary vendor chains and monitor timelines closely" },
+      { "risk": "Quality non-conformance issues", "mitigation": "Conduct strict internal daily checkups under designated owner" }
     ],
-    "completionCriteria": "Successful completion of hydrostatic pressure testing with zero leakage, followed by formal handover signature from the quality engineer."
+    "completionCriteria": "Successful completion of all specified milestone tasks followed by formal handover signature from the engineering reviewer."
   };
 }
 

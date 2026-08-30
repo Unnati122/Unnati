@@ -14,82 +14,101 @@
   
   <!-- Custom Core Design overrides -->
   <link rel="stylesheet" href="app.css?v=6">
-  
   <style>
-    .settings-card {
-      border: 1px solid #E2E8F0 !important;
-      border-radius: 12px;
-      background: #FFFFFF;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      margin-bottom: 24px;
-    }
-    .settings-card-header {
-      background: #F8FAFC;
-      border-bottom: 1px solid #E2E8F0;
-      padding: 16px 24px;
-    }
-    .form-label {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 6px;
-    }
-    .form-control, .form-select {
-      font-size: 13px;
-      border-radius: 6px;
-      border: 1px solid #CBD5E1;
-      padding: 6px 12px;
-      color: #1E293B;
-    }
-    .form-control:focus, .form-select:focus {
-      border-color: var(--gov-primary);
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
-    }
+    .page-header { padding: 0 0 20px 0; border-bottom: 1px solid #E2E8F0; margin-bottom: 24px; }
+    .page-header h2 { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700; color: #0F172A; margin: 0 0 4px; }
+    .page-header p { font-size: 13.5px; color: #64748B; margin: 0; }
+
+    .panel { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+    .panel-header { padding: 14px 20px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; }
+    .panel-header h3 { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; color: #0F172A; margin: 0; }
+    .panel-header .panel-badge { font-size: 12px; font-weight: 500; color: #6B7280; background: #F3F4F6; border: 1px solid #E5E7EB; padding: 3px 10px; border-radius: 20px; }
+    .panel-body { padding: 20px; }
+    .panel-body-flush { padding: 0; }
+
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .field-input { width: 100%; font-size: 13.5px; border: 1px solid #D1D5DB; border-radius: 7px; padding: 9px 12px; color: #111827; background: #fff; outline: none; transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box; }
+    .field-input:focus { border-color: #D85800; box-shadow: 0 0 0 3px rgba(216,88,0,0.1); }
+    .field-select { width: 100%; font-size: 13.5px; border: 1px solid #D1D5DB; border-radius: 7px; padding: 9px 12px; color: #111827; background: #fff; outline: none; appearance: auto; box-sizing: border-box; }
+    .field-select:focus { border-color: #D85800; box-shadow: 0 0 0 3px rgba(216,88,0,0.1); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-group { margin-bottom: 14px; }
+
+    .btn-action { display: block; width: 100%; padding: 10px; background: #D85800; color: #fff; border: none; border-radius: 7px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .btn-action:hover { background: #B84500; }
+    .btn-action-secondary { display: block; width: 100%; padding: 10px; background: #fff; color: #374151; border: 1px solid #D1D5DB; border-radius: 7px; font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.15s; margin-top: 8px; display: none; }
+    .btn-action-secondary:hover { border-color: #9CA3AF; }
+    .btn-danger-outline { padding: 9px 20px; background: #fff; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 7px; font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn-danger-outline:hover { background: #FEF2F2; border-color: #DC2626; }
+
+    .btn-refresh { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border: 1px solid #E5E7EB; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; }
+    .btn-refresh:hover { border-color: #D85800; color: #D85800; }
+    .btn-blue { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 7px; font-size: 12px; font-weight: 500; color: #1D4ED8; cursor: pointer; transition: all 0.15s; }
+    .btn-blue:hover { background: #DBEAFE; }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead tr { background: #F9FAFB; }
+    .data-table thead th { padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 1px solid #E5E7EB; white-space: nowrap; }
+    .data-table tbody td { padding: 12px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: #F9FAFB; }
+    .data-table td:last-child { white-space: nowrap; }
+
+    .badge-active { display: inline-flex; align-items: center; gap: 5px; background: #ECFDF5; color: #065F46; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .badge-inactive { display: inline-flex; align-items: center; gap: 5px; background: #FEF2F2; color: #991B1B; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .action-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; border: 1px solid #E5E7EB; background: #fff; cursor: pointer; font-size: 11px; color: #6B7280; transition: all 0.15s; }
+    .action-btn:hover { background: #F9FAFB; color: #111827; border-color: #D85800; }
+
+    .info-box { display: flex; gap: 10px; padding: 12px 14px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; margin-bottom: 16px; }
+    .info-box i { color: #16A34A; margin-top: 1px; flex-shrink: 0; }
+    .info-box p { font-size: 12.5px; color: #166534; margin: 0; line-height: 1.5; }
+
+    .danger-panel { background: #FFFFFF; border: 1px solid #FECACA; border-radius: 12px; overflow: hidden; }
+    .danger-panel-header { padding: 14px 20px; background: #FEF2F2; border-bottom: 1px solid #FECACA; }
+    .danger-panel-header h3 { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; color: #991B1B; margin: 0; }
+    .danger-panel-body { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+
+    .proj-check-list { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 7px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .proj-check-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; cursor: pointer; }
+    .monospace { font-family: 'Courier New', monospace; background: #F3F4F6; padding: 2px 7px; border-radius: 4px; }
   </style>
 </head>
 <body>
 
   <div class="app-layout" id="app-layout">
-    <!-- Main Workspace -->
-    <main class="main-workspace" style="overflow-y: auto;">
-      <div style="padding: 28px 32px;">
-        
+    <main class="main-workspace" style="overflow-y: auto; background: #F8FAFC;">
+      <div style="padding: 28px 32px; max-width: 100%;">
+
         <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h2 style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: #1E293B; margin: 0 0 4px 0;">System Settings &amp; Governance</h2>
-            <p style="font-size: 12.5px; color: #64748B; margin: 0;">Manage project managers, operational roles, and platform parameters.</p>
-          </div>
+        <div class="page-header">
+          <h2>System Settings &amp; Governance</h2>
+          <p>Manage project managers, operational roles, and platform parameters.</p>
         </div>
 
-        <div class="row">
-          
-          <!-- LEFT COLUMN: Managers List -->
-          <div class="col-lg-7">
-            <div class="card settings-card">
-              <div class="settings-card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-dark font-weight-bold" style="font-size: 14.5px; font-family: 'Outfit', sans-serif;">
-                  <i class="fa-solid fa-users-gear text-primary me-2"></i>Project Managers Registry
-                </h5>
-                <span class="badge bg-light text-dark border font-size-11" id="activeProjectLabel">Project: Loading...</span>
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start;">
+
+          <!-- LEFT: Managers Table -->
+          <div id="adminSectionLeft">
+
+            <div class="panel">
+              <div class="panel-header">
+                <h3><i class="fa-solid fa-users-gear" style="color:#D85800; margin-right:8px;"></i>Project Managers</h3>
+                <span class="panel-badge" id="activeProjectLabel">Project: Loading...</span>
               </div>
-              <div class="card-body p-4">
-                <p style="font-size:12.5px; color:#64748B; margin-bottom:18px;">Below is the registry of managers assigned to the selected project. Changes synchronize instantly to the backend user database.</p>
-                
-                <div class="table-responsive">
-                  <table class="table table-bordered table-sm align-middle" id="managersTable">
-                    <thead class="bg-light">
-                      <tr style="font-size:11.5px; font-weight:700; color:#475569;">
+              <div class="panel-body-flush">
+                <div style="overflow-x: auto;">
+                  <table class="data-table" id="managersTable">
+                    <thead>
+                      <tr>
                         <th>Username</th>
                         <th>Name</th>
                         <th>Responsibility</th>
                         <th>Permissions</th>
                         <th>Status</th>
-                        <th style="width:100px;">Actions</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
-                    <tbody style="font-size:12.5px;">
+                    <tbody>
                       <!-- Populated dynamically -->
                     </tbody>
                   </table>
@@ -97,110 +116,133 @@
               </div>
             </div>
 
-            <!-- CARD: Administrative Reset -->
-            <div class="card settings-card" style="border-color:#FCA5A5 !important;">
-              <div class="settings-card-header bg-danger bg-opacity-10" style="border-bottom-color:#FECACA;">
-                <h5 class="mb-0 text-danger font-weight-bold" style="font-size: 14.5px; font-family: 'Outfit', sans-serif;">
-                  <i class="fa-solid fa-triangle-exclamation me-2"></i>Danger Zone - Administrative Reset
-                </h5>
+            <!-- Danger Zone -->
+            <div class="danger-panel">
+              <div class="danger-panel-header">
+                <h3><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>Danger Zone</h3>
               </div>
-              <div class="card-body p-4">
-                <p style="font-size:13px; color:#475569;">Clicking the reset button below will format the local JSON database files, purging all active progress diaries, chat logs, and baseline changes, resetting everything back to the default project seeds.</p>
-                <button class="btn btn-danger font-weight-bold" onclick="resetDatabase()" style="font-size:12.5px; padding:8px 16px; background:#DC2626;">
-                  <i class="fa-solid fa-rotate-left me-1.5"></i>Reset System to Seeds
+              <div class="danger-panel-body">
+                <div>
+                  <div style="font-weight: 600; font-size: 13.5px; color: #111827; margin-bottom: 4px;">Reset Platform to Seeds</div>
+                  <div style="font-size: 13px; color: #6B7280;">Purges all progress diaries, chat logs, and baseline changes. Cannot be undone.</div>
+                </div>
+                <button class="btn-danger-outline" onclick="resetDatabase()">
+                  <i class="fa-solid fa-rotate-left" style="margin-right:6px;"></i>Factory Reset
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: Add/Edit Manager Form -->
-          <div class="col-lg-5">
-            <div class="card settings-card">
-              <div class="settings-card-header">
-                <h5 class="mb-0 text-dark font-weight-bold" style="font-size: 14.5px; font-family: 'Outfit', sans-serif;" id="formTitle">
-                  <i class="fa-solid fa-user-plus text-primary me-2"></i>Add Project Manager
-                </h5>
-              </div>
-              <div class="card-body p-4">
-                <form id="managerForm" onsubmit="saveManager(event)">
-                  <input type="hidden" id="editMode" value="false">
+          <!-- RIGHT column wrapper -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
 
-                  <div class="mb-3">
-                    <label class="form-label" for="mUsername">Username</label>
-                    <input type="text" class="form-control" id="mUsername" placeholder="e.g. rahul-hse" required>
-                  </div>
+            <!-- Add / Edit Manager Form — Admin only -->
+            <div id="adminSectionRight">
+              <div class="panel">
+                <div class="panel-header">
+                  <h3 id="formTitle"><i class="fa-solid fa-user-plus" style="color:#D85800; margin-right:8px;"></i>Add Manager</h3>
+                </div>
+                <div class="panel-body">
+                  <form id="managerForm" onsubmit="saveManager(event)">
+                    <input type="hidden" id="editMode" value="false">
 
-                  <div class="mb-3">
-                    <label class="form-label" for="mPassword">Password</label>
-                    <input type="password" class="form-control" id="mPassword" placeholder="Enter new password (optional if editing)">
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label" for="mName">Full Name</label>
-                    <input type="text" class="form-control" id="mName" placeholder="e.g. Rahul Bose" required>
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label" for="mResponsibility">Responsibility</label>
-                    <select class="form-select" id="mResponsibility" onchange="suggestPermissions(this.value)">
-                      <option value="Project Manager">Project Manager (Full Scope)</option>
-                      <option value="HSE Manager">HSE Manager (Safety Scopes)</option>
-                      <option value="Operations Manager">Operations Manager (Civil/Mech Spools)</option>
-                      <option value="Planning Manager">Planning Manager (Timeline/Planner)</option>
-                    </select>
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label">Scope / Permissions</label>
-                    <select class="form-select" id="mPermissions">
-                      <option value="operational_full">Full Project Operational Access</option>
-                      <option value="hse_only">Safety/HSE Tasks &amp; Review Queue Only</option>
-                      <option value="operations_only">Operations/Civil/Mech Logs Only</option>
-                      <option value="planning_only">Planning, Milestones &amp; Timelines Only</option>
-                    </select>
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label">Project Assignments</label>
-                    <div class="border rounded p-3 d-flex flex-column gap-2" style="background:#F8FAFC;">
-                      <div class="form-check">
-                        <input class="form-check-input proj-check" type="checkbox" value="PROJ-1" id="chkProj1" checked>
-                        <label class="form-check-label font-size-13" for="chkProj1">Pipeline Construction Segment 1</label>
+                    <div class="field-row">
+                      <div class="field-group">
+                        <label class="field-label" for="mUsername">Username</label>
+                        <input class="field-input" type="text" id="mUsername" placeholder="e.g. rahul01" required>
                       </div>
-                      <div class="form-check">
-                        <input class="form-check-input proj-check" type="checkbox" value="PROJ-2" id="chkProj2">
-                        <label class="form-check-label font-size-13" for="chkProj2">Digboi Infrastructure Expansion</label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input proj-check" type="checkbox" value="PROJ-3" id="chkProj3">
-                        <label class="form-check-label font-size-13" for="chkProj3">Numaligarh Bio-Refinery Development</label>
+                      <div class="field-group">
+                        <label class="field-label" for="mPassword">Password</label>
+                        <input class="field-input" type="password" id="mPassword" placeholder="New password">
                       </div>
                     </div>
-                  </div>
 
-                  <div class="mb-4">
-                    <label class="form-label" for="mStatus">Account Status</label>
-                    <select class="form-select" id="mStatus">
-                      <option value="active" selected>Active</option>
-                      <option value="inactive">Inactive / Suspended</option>
-                    </select>
-                  </div>
+                    <div class="field-group">
+                      <label class="field-label" for="mName">Full Name</label>
+                      <input class="field-input" type="text" id="mName" placeholder="e.g. Rahul Bose" required>
+                    </div>
 
-                  <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100 font-weight-bold" style="background:var(--gov-primary); border:none;">
-                      <i class="fa-solid fa-floppy-disk me-1.5"></i>Save Manager
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary w-100 font-weight-bold" id="cancelBtn" onclick="resetForm()" style="display:none;">
-                      Cancel Edit
-                    </button>
+                    <div class="field-group">
+                      <label class="field-label" for="mResponsibility">Responsibility</label>
+                      <select class="field-select" id="mResponsibility" onchange="suggestPermissions(this.value)">
+                        <option value="Project Manager">Project Manager (Full Scope)</option>
+                        <option value="HSE Manager">HSE Manager (Safety)</option>
+                        <option value="Operations Manager">Operations Manager</option>
+                        <option value="Planning Manager">Planning Manager</option>
+                      </select>
+                    </div>
+
+                    <div class="field-group">
+                      <label class="field-label">Permissions Scope</label>
+                      <select class="field-select" id="mPermissions">
+                        <option value="operational_full">Full Project Access</option>
+                        <option value="hse_only">HSE Tasks &amp; Review Only</option>
+                        <option value="operations_only">Operations / Civil Only</option>
+                        <option value="planning_only">Planning &amp; Timelines Only</option>
+                      </select>
+                    </div>
+
+                    <div class="field-group">
+                      <label class="field-label">Project Assignments</label>
+                      <div class="proj-check-list">
+                        <label class="proj-check-item"><input class="proj-check" type="checkbox" value="PROJ-1" id="chkProj1" checked style="accent-color:#D85800;"> Pipeline Construction Segment 1</label>
+                        <label class="proj-check-item"><input class="proj-check" type="checkbox" value="PROJ-2" id="chkProj2" style="accent-color:#D85800;"> Digboi Infrastructure Expansion</label>
+                        <label class="proj-check-item"><input class="proj-check" type="checkbox" value="PROJ-3" id="chkProj3" style="accent-color:#D85800;"> Numaligarh Bio-Refinery</label>
+                      </div>
+                    </div>
+
+                    <div class="field-group">
+                      <label class="field-label" for="mStatus">Account Status</label>
+                      <select class="field-select" id="mStatus">
+                        <option value="active" selected>Active</option>
+                        <option value="inactive">Inactive / Suspended</option>
+                      </select>
+                    </div>
+
+                    <button type="submit" class="btn-action">Save Manager</button>
+                    <button type="button" class="btn-action-secondary" id="cancelBtn" onclick="resetForm()">Cancel Edit</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Geofence Settings — visible to all roles -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3><i class="fa-solid fa-map-location-dot" style="color:#D85800; margin-right:8px;"></i>Project Geofence</h3>
+                <button class="btn-blue" type="button" onclick="fetchCurrentGeo(this)">
+                  <i class="fa-solid fa-crosshairs"></i> Auto-Detect
+                </button>
+              </div>
+              <div class="panel-body">
+                <div class="info-box">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <p>Set the geographic boundaries. Field workers must be within this radius to log in.</p>
+                </div>
+                <form id="geofenceForm" onsubmit="saveGeofence(event)">
+                  <div class="field-row">
+                    <div class="field-group">
+                      <label class="field-label" for="geoLat">Latitude</label>
+                      <input class="field-input" type="number" step="any" id="geoLat" placeholder="e.g. 26.1234" required>
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label" for="geoLon">Longitude</label>
+                      <input class="field-input" type="number" step="any" id="geoLon" placeholder="e.g. 91.5678" required>
+                    </div>
                   </div>
+                  <div class="field-group">
+                    <label class="field-label" for="geoRadius">Allowed Radius (meters)</label>
+                    <input class="field-input" type="number" id="geoRadius" placeholder="e.g. 500" required>
+                  </div>
+                  <button type="submit" class="btn-action">
+                    <i class="fa-solid fa-satellite-dish" style="margin-right:6px;"></i>Update Boundaries
+                  </button>
                 </form>
               </div>
             </div>
-          </div>
 
+          </div><!-- end right column wrapper -->
         </div>
-
       </div>
     </main>
   </div>
@@ -212,12 +254,11 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Ensure only Admin can access this page
-      const role = localStorage.getItem('userRole');
-      if (role !== 'admin') {
-        alert('Access Denied: Only Administrators can access System settings.');
-        window.location.href = 'index.html';
-        return;
+      const role = localStorage.getItem('userRole') || 'admin';
+
+      if (role === 'manager') {
+        document.getElementById('adminSectionLeft').style.display = 'none';
+        document.getElementById('adminSectionRight').style.display = 'none';
       }
 
       renderSharedComponents('settings');
@@ -227,14 +268,83 @@
       document.getElementById('activeProjectLabel').innerText = `Active Project: ${pId}`;
       
       loadManagers(pId);
+      loadGeofence(pId);
     });
 
     // Sync with the global project selector change in header
     window.addEventListener('projectChanged', (e) => {
-      const pId = e.detail.projectId;
-      document.getElementById('activeProjectLabel').innerText = `Active Project: ${pId}`;
-      loadManagers(pId);
+      const activeProject = localStorage.getItem('activeProject') || 'PROJ-1';
+      document.getElementById('activeProjectLabel').innerText = `Project: ${activeProject}`;
+
+      loadManagers(activeProject);
+      loadGeofence(activeProject);
     });
+
+    async function loadGeofence(projectId) {
+      try {
+        const result = await fetchAPI(`/api/manager/projects/${projectId}/location`);
+        if (result && !result.error) {
+          document.getElementById('geoLat').value = result.latitude || '';
+          document.getElementById('geoLon').value = result.longitude || '';
+          document.getElementById('geoRadius').value = result.radius || 100;
+        }
+      } catch(err) {
+        console.error('Error loading geofence', err);
+      }
+    }
+
+    async function saveGeofence(event) {
+      event.preventDefault();
+      const projectId = localStorage.getItem('activeProject') || 'PROJ-1';
+      const payload = {
+        latitude: parseFloat(document.getElementById('geoLat').value),
+        longitude: parseFloat(document.getElementById('geoLon').value),
+        radius: parseInt(document.getElementById('geoRadius').value, 10)
+      };
+
+      try {
+        const result = await fetchAPI(`/api/manager/projects/${projectId}/location`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (result && result.success) {
+          alert('Project Geofence settings updated successfully.');
+        } else {
+          alert('Error: ' + (result?.error || 'Failed to update geofence'));
+        }
+      } catch (err) {
+        alert('Connection error.');
+      }
+    }
+
+    function fetchCurrentGeo(btnElem) {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+      
+      const originalHtml = btnElem.innerHTML;
+      btnElem.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      btnElem.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          document.getElementById('geoLat').value = position.coords.latitude;
+          document.getElementById('geoLon').value = position.coords.longitude;
+          btnElem.innerHTML = originalHtml;
+          btnElem.disabled = false;
+        },
+        (error) => {
+          console.error(error);
+          alert("Unable to retrieve your location. Please check your browser permissions.");
+          btnElem.innerHTML = originalHtml;
+          btnElem.disabled = false;
+        },
+        { enableHighAccuracy: true }
+      );
+    }
 
     async function loadManagers(projectId) {
       const managers = await fetchAPI('/api/admin/managers');
@@ -247,38 +357,37 @@
       }
 
       // Filter managers that belong to the active project context (unless ALL is selected)
-      const filtered = managers.filter(m => projectId === 'ALL' || m.assignedProjects.includes(projectId));
+      const filtered = managers.filter(m => projectId === 'ALL' || (m.assignedProjects || []).includes(projectId));
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">No managers assigned to this project.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#9CA3AF;">No managers assigned to this project.</td></tr>';
         return;
       }
 
       tbody.innerHTML = filtered.map(m => {
-        const permLabel = m.permissions.includes('all') ? 'Full Admin' : 
-                          m.permissions.includes('operational_full') ? 'Full Operational' :
-                          m.permissions.includes('hse_only') ? 'Safety/HSE' :
-                          m.permissions.includes('operations_only') ? 'Operations' : 'Planning';
+        const perms = m.permissions || [];
+        const permLabel = perms.includes('all') ? 'Full Admin' : 
+                          perms.includes('operational_full') ? 'Full Operational' :
+                          perms.includes('hse_only') ? 'Safety/HSE' :
+                          perms.includes('operations_only') ? 'Operations' : 'Planning';
+        const assigned = m.assignedProjects || [];
+        const statusBadge = m.status === 'active'
+          ? '<span class="badge-active"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Active</span>'
+          : '<span class="badge-inactive"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Inactive</span>';
         return `
           <tr>
-            <td style="font-weight:600; color:#475569;">${m.username}</td>
-            <td>${m.name}</td>
-            <td><span class="badge bg-light text-dark border">${m.responsibility}</span></td>
-            <td>${permLabel}</td>
-            <td>
-              <span class="badge bg-${m.status==='active'?'success':'danger'}">
-                ${m.status}
-              </span>
-            </td>
-            <td>
-              <div class="d-flex gap-1">
-                <button class="btn btn-sm btn-outline-primary px-2" onclick="editManager('${m.username}', '${m.name}', '${m.responsibility}', '${m.status}', '${m.permissions[0]}', ${JSON.stringify(m.assignedProjects)})">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteManager('${m.username}')">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </div>
+            <td><span class="monospace" style="font-size:13px;">${m.username}</span></td>
+            <td style="font-weight:500;">${m.name}</td>
+            <td style="color:#6B7280; font-size:13px;">${m.responsibility || '—'}</td>
+            <td style="font-size:13px;">${permLabel}</td>
+            <td>${statusBadge}</td>
+            <td style="display:flex; gap:6px;">
+              <button class="action-btn" onclick="editManager('${m.username}', '${m.name}', '${m.responsibility}', '${m.status}', '${(perms[0] || '')}', ${JSON.stringify(assigned)})" title="Edit">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="action-btn" onclick="deleteManager('${m.username}')" title="Delete" style="color:#EF4444;">
+                <i class="fa-solid fa-trash"></i>
+              </button>
             </td>
           </tr>
         `;
@@ -399,7 +508,7 @@
 
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch('/api/reset', {
+        const response = await fetch('http://localhost:3005/api/reset', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });

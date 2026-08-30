@@ -172,7 +172,7 @@
       </div>
 
       <!-- Loading / Empty Placeholder -->
-      <div id="aiPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;">
+      <div id="aiPlaceholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;">
         <div style="width: 60px; height: 60px; background: rgba(10,34,64,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
           <i class="fa-solid fa-list-check" style="color: #0A2240; font-size: 24px;"></i>
         </div>
@@ -181,7 +181,58 @@
       </div>
 
       <!-- Grid list -->
-      <div class="row" id="aiReviewGrid" style="row-gap: 24px;"></div>
+      <div class="row" id="aiReviewGrid" style="row-gap: 24px;">
+        <!-- Skeleton Card 1 -->
+        <div style="flex: 1; min-width: 420px; max-width: 100%;">
+          <div class="skeleton-card">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span class="skeleton-box" style="width: 50px; height: 16px;"></span>
+                <span class="skeleton-box" style="width: 80px; height: 14px;"></span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <div style="flex: 1;">
+                  <span class="skeleton-box" style="width: 90%; height: 16px; margin-bottom: 8px;"></span>
+                  <span class="skeleton-box" style="width: 75%; height: 16px; margin-bottom: 8px;"></span>
+                  <span class="skeleton-box" style="width: 100%; height: 28px; margin-top: 10px;"></span>
+                </div>
+                <span class="skeleton-box" style="width: 90px; height: 90px; margin-left: 16px; border-radius: 8px;"></span>
+              </div>
+              <span class="skeleton-box" style="width: 100%; height: 42px; border-radius: 6px;"></span>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 12px; margin-top: 12px;">
+              <span class="skeleton-box" style="width: 60px; height: 28px; border-radius: 6px;"></span>
+              <span class="skeleton-box" style="width: 110px; height: 28px; border-radius: 6px;"></span>
+              <span class="skeleton-box" style="width: 80px; height: 28px; border-radius: 6px;"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Skeleton Card 2 -->
+        <div style="flex: 1; min-width: 420px; max-width: 100%;">
+          <div class="skeleton-card">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span class="skeleton-box" style="width: 50px; height: 16px;"></span>
+                <span class="skeleton-box" style="width: 80px; height: 14px;"></span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <div style="flex: 1;">
+                  <span class="skeleton-box" style="width: 85%; height: 16px; margin-bottom: 8px;"></span>
+                  <span class="skeleton-box" style="width: 70%; height: 16px; margin-bottom: 8px;"></span>
+                  <span class="skeleton-box" style="width: 100%; height: 28px; margin-top: 10px;"></span>
+                </div>
+                <span class="skeleton-box" style="width: 90px; height: 90px; margin-left: 16px; border-radius: 8px;"></span>
+              </div>
+              <span class="skeleton-box" style="width: 100%; height: 42px; border-radius: 6px;"></span>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 12px; margin-top: 12px;">
+              <span class="skeleton-box" style="width: 60px; height: 28px; border-radius: 6px;"></span>
+              <span class="skeleton-box" style="width: 110px; height: 28px; border-radius: 6px;"></span>
+              <span class="skeleton-box" style="width: 80px; height: 28px; border-radius: 6px;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </main>
   </div>
@@ -258,62 +309,68 @@
           mockMatchPct = Math.max(40, confPct - 7);
         }
 
+        const photoHtml = log.photoFilePath ? `
+          <div style="flex-shrink: 0; width: 90px; height: 90px; border-radius: 8px; overflow: hidden; border: 1px solid #E2E8F0; margin-left: 16px; cursor: pointer;" onclick="window.open(this.querySelector('img').src)">
+            <img src="${API_URL}${log.photoFilePath}" style="width: 100%; height: 100%; object-fit: cover;" alt="Site photo" title="Click to view full size" />
+          </div>
+        ` : '';
+        const audioHtml = log.audioFilePath ? `
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; width: 100%;">
+            <audio controls src="${API_URL}${log.audioFilePath}" style="width: 100%; height: 28px; outline: none;"></audio>
+          </div>
+        ` : '';
+
         return `
-          <div class="review-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #EF4444; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 20px; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 300px; height: 100%;">
+          <div class="review-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 3px solid #EF4444; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; min-height: 250px; height: 100%; font-family: 'Inter', sans-serif;">
             <div>
-              <!-- Top badge + ID + Time -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <!-- Top Header -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px; text-transform: uppercase;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Human review
+                  <span style="background: #FEE2E2; color: #EF4444; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px;">
+                    Review
                   </span>
-                  <span style="font-size: 12px; font-weight: 600; color: #64748B;">ID: ${log.id.toUpperCase().substring(0, 8)}</span>
+                  <span style="font-size: 11px; font-weight: 600; color: #64748B;">ID: ${log.id.toUpperCase().substring(0, 8)}</span>
                 </div>
                 <span style="font-size: 11px; color: #94A3B8;">${timeAgo}</span>
               </div>
 
-              <!-- Field Statement -->
-              <div style="margin-bottom: 16px;">
-                <div style="font-size: 9.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Field Statement</div>
-                <div style="background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 6px; padding: 10px 14px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500; color: #1E293B; line-height: 1.45; font-style: italic;">
-                  "${log.rawText}"
+              <!-- Main Content: text on left, image on right -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-family: 'Outfit', sans-serif; font-size: 13.5px; font-weight: 500; color: #1E293B; line-height: 1.45; word-break: break-word;">
+                    "${log.rawText}"
+                  </div>
+                  ${audioHtml}
                 </div>
+                ${photoHtml}
               </div>
 
-              <!-- Top Match -->
-              <div style="margin-bottom: 14px;">
-                <div style="font-size: 9.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Top Match</div>
-                <div style="background: #F1F5F9; border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                  <span style="font-size: 12px; font-weight: 600; color: #334155; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${log.matchedTaskDescription || 'Unmatched'}">
-                    ${log.matchedTaskDescription || 'No direct match found'}
-                  </span>
-                  <span style="font-size: 12px; font-weight: 700; color: #1E3A8A; flex-shrink: 0;">${confPct}%</span>
-                </div>
-              </div>
-
-              <!-- Reason for Uncertainty -->
-              <div style="margin-bottom: 20px;">
-                <div style="font-size: 9.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Reason for Uncertainty</div>
-                <div style="font-size: 11.5px; color: #78350F; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px 14px; line-height: 1.5;">
-                  ${uncertaintyReason}
+              <!-- Top Match & Uncertainty (Consolidated) -->
+              <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 12px; margin-bottom: 16px;">
+                <div style="font-size: 11px; color: #78350F; font-weight: 500; line-height: 1.4;">
+                  <strong>Top Match (${confPct}%):</strong> ${log.matchedTaskDescription || 'No direct match found'}
+                  <div style="font-size: 10px; color: #B45309; font-weight: 400; margin-top: 2px;">
+                    ${uncertaintyReason}
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Actions Footer -->
-            <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 14px; margin-top: auto;">
-              <button onclick="rejectLog('${log.id}')" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #64748B; font-weight: 600; font-size: 12px; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif;" onmouseover="this.style.background='#FEF2F2'; this.style.color='#EF4444';" onmouseout="this.style.background='#FFFFFF'; this.style.color='#64748B';">
+            <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 12px;">
+              <button onclick="rejectLog('${log.id}')" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #64748B; font-weight: 600; font-size: 11.5px; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='#FEF2F2'; this.style.color='#EF4444';" onmouseout="this.style.background='#FFFFFF'; this.style.color='#64748B';">
                 Reject
               </button>
-              <button onclick="openChangeActivity('${log.id}')" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #0A2240; font-weight: 600; font-size: 12px; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif;" onmouseover="this.style.background='#F8FAFC';" onmouseout="this.style.background='#FFFFFF';">
+              <button onclick="openChangeActivity('${log.id}')" style="background: #FFFFFF; border: 1px solid #E2E8F0; color: #0A2240; font-weight: 600; font-size: 11.5px; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='#F8FAFC';" onmouseout="this.style.background='#FFFFFF';">
                 Change Activity
               </button>
-              <button onclick="confirmLogMatch('${log.id}')" style="background: #0A2240; border: none; color: #FFFFFF; font-weight: 600; font-size: 12px; padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif;" onmouseover="this.style.background='#112D55';" onmouseout="this.style.background='#0A2240';">
-                <i class="fa-solid fa-check"></i> Approve (${confPct}%)
+              <button onclick="confirmLogMatch('${log.id}')" style="background: #0A2240; border: none; color: #FFFFFF; font-weight: 600; font-size: 11.5px; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s;" onmouseover="this.style.background='#112D55';" onmouseout="this.style.background='#0A2240';">
+                <i class="fa-solid fa-check"></i> Approve
               </button>
             </div>
           </div>
         `;
+
       }).join('');
     }
 

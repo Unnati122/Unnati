@@ -282,6 +282,11 @@
       
       loadAssignedTasks(currentProject);
       loadMySubmissions(currentProject);
+
+      // Auto-refresh updates feed every 4 seconds
+      setInterval(() => {
+        loadMySubmissions(currentProject);
+      }, 4000);
     });
 
     function logout() {
@@ -292,7 +297,7 @@
     async function loadAssignedTasks(projectId) {
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch(`/api/baseline?projectId=${projectId}`, {
+        const response = await fetch(`http://localhost:3005/api/baseline?projectId=${projectId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const tasks = await response.json();
@@ -331,7 +336,7 @@
 
       // Submit an ingestion report showing completed status
       try {
-        const response = await fetch('/api/ingest-text', {
+        const response = await fetch('http://localhost:3005/api/ingest-text', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -362,7 +367,7 @@
       const token = localStorage.getItem('token');
       const name = localStorage.getItem('username');
       try {
-        const response = await fetch(`/api/logs?projectId=${projectId}`, {
+        const response = await fetch(`http://localhost:3005/api/logs?projectId=${projectId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const logs = await response.json();
@@ -371,7 +376,7 @@
         if (!response.ok || !logs) return;
 
         // Filter logs posted by this operator or generic report submissions
-        const filtered = logs.filter(l => l.source === 'Mobile Field App' || l.rawText.includes(name));
+        const filtered = logs.filter(l => l.source === 'Mobile Field App' || l.source === 'Voice Mobile App' || l.rawText.includes(name));
 
         if (filtered.length === 0) {
           container.innerHTML = '<div class="text-center py-3 text-muted" style="font-size:12px;">No submissions reported today.</div>';
@@ -381,6 +386,18 @@
         container.innerHTML = filtered.slice(0, 5).map(l => {
           const isLinked = l.status === 'Linked';
           const title = l.extracted && l.extracted.activity ? l.extracted.activity : l.rawText;
+          const host = 'http://localhost:3005';
+          const photoHtml = l.photoFilePath ? `
+            <div style="margin-top: 8px;">
+              <img src="${host}${l.photoFilePath}" style="max-width: 100%; max-height: 100px; border-radius: 6px; border: 1px solid #E2E8F0;" alt="Site photo" />
+            </div>
+          ` : '';
+          const audioHtml = l.audioFilePath ? `
+            <div style="margin-top: 8px;">
+              <audio controls src="${host}${l.audioFilePath}" style="width: 100%; height: 28px;"></audio>
+            </div>
+          ` : '';
+
           return `
             <div class="log-item ${isLinked ? 'linked' : 'pending'}">
               <div class="d-flex justify-content-between mb-1">
@@ -388,6 +405,8 @@
                 <span class="text-muted">${new Date(l.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
               </div>
               <p style="margin:0;">${title}</p>
+              ${photoHtml}
+              ${audioHtml}
               <div style="font-size:10px; margin-top:4px; font-weight:600; color:${isLinked?'#10B981':'#F59E0B'}">
                 Status: ${l.status}
               </div>
@@ -431,7 +450,7 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
-      const response = await fetch('/api/ingest-text', {
+      const response = await fetch('http://localhost:3005/api/ingest-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -470,7 +489,7 @@
       const issue = document.getElementById('issueText').value;
       const category = document.getElementById('issueType').value;
 
-      const response = await fetch('/api/ingest-text', {
+      const response = await fetch('http://localhost:3005/api/ingest-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

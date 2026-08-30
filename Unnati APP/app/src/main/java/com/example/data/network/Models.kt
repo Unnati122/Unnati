@@ -5,7 +5,21 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class LoginRequest(
     val username: String,
-    val password: String
+    val password: String,
+    val latitude: Double? = null,
+    val longitude: Double? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class VerifyLocationRequest(
+    val latitude: Double?,
+    val longitude: Double?
+)
+
+@JsonClass(generateAdapter = true)
+data class VerifyLocationResponse(
+    val allowed: Boolean,
+    val message: String?
 )
 
 @JsonClass(generateAdapter = true)
@@ -22,7 +36,17 @@ data class NetworkUser(
     val role: String,
     val responsibility: String,
     val assignedProjects: List<String>,
-    val permissions: List<String>
+    val permissions: List<String>,
+    val phone: String = "",
+    val digitalId: String = "",
+    val projectDetails: ProjectDetailsDto? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class ProjectDetailsDto(
+    val id: String,
+    val name: String,
+    val location: String
 )
 
 @JsonClass(generateAdapter = true)
@@ -55,5 +79,6 @@ data class NetworkVoiceUpdate(
     val status: String,
     val category: String,
     val waveform: List<Float> = emptyList(),
-    val audioFilePath: String? = null
+    val audioFilePath: String? = null,
+    val photoFilePath: String? = null
 )

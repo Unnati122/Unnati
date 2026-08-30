@@ -1,5 +1,5 @@
 // UNNATI Frontend Application Logic
-const API_URL = ''; // Same host
+const API_URL = 'http://localhost:3005'; // Point to standalone backend
 
 // Helper functions for API requests
 async function fetchAPI(endpoint, options = {}) {
@@ -27,31 +27,37 @@ async function fetchAPI(endpoint, options = {}) {
   }
 
   try {
+    const { headers: optHeaders, ...restOptions } = options;
     const response = await fetch(`${API_URL}${url}`, {
+      ...restOptions,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-        ...options.headers
-      },
-      ...options
+        ...(optHeaders || {})
+      }
     });
     
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       const errData = await response.json();
-      alert(`Access Denied: ${errData.error || 'Insufficient permissions.'}`);
-      if (response.status === 401) {
-        localStorage.clear();
-        window.location.href = 'login.html';
-      }
+      alert(`Access Denied: ${errData.error || 'Session expired. Please log in again.'}`);
+      localStorage.clear();
+      window.location.href = 'login.html';
       return null;
     }
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errMsg = `Request failed (${response.status})`;
+      try {
+        const errData = await response.json();
+        errMsg = errData.error || errMsg;
+      } catch(e) {}
+      alert(errMsg);
+      return null;
     }
     return await response.json();
   } catch (error) {
     console.error(`API Error on ${endpoint}:`, error);
+    alert('Could not connect to the server. Please check your connection.');
     return null;
   }
 }
@@ -213,19 +219,52 @@ function renderTimeline(logs) {
     const isLinked = log.status === 'Linked';
     const logTime = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const activityTitle = log.extracted && log.extracted.activity ? log.extracted.activity : log.rawText;
+    const photoHtml = log.photoFilePath ? `
+      <div style="margin-top: 8px;">
+        <img src="${API_URL}${log.photoFilePath}" style="max-width: 260px; max-height: 140px; border-radius: 8px; border: 1px solid #E2E8F0;" alt="Site photo" />
+      </div>
+    ` : '';
+    const audioHtml = log.audioFilePath ? `
+      <div style="margin-top: 8px;">
+        <audio controls src="${API_URL}${log.audioFilePath}" style="width: 100%; max-width: 300px; height: 28px;"></audio>
+      </div>
+    ` : '';
     
     return `
       <div class="timeline-item ${isLinked ? 'linked' : 'pending'}">
         <span class="timeline-time">${logDate} at ${logTime} &bull; ${log.source}</span>
-        <div class="timeline-title text-dark">${log.extracted.activity}</div>
+        <div class="timeline-title text-dark">${activityTitle}</div>
         <div class="timeline-desc font-size-12 mt-1">
-          <strong>Discipline:</strong> ${log.extracted.discipline} | <strong>Status:</strong> ${log.extracted.status}<br>
+          <strong>Discipline:</strong> ${log.extracted.discipline || 'General'} | <strong>Status:</strong> ${log.extracted.status || 'Pending Review'}<br>
           <span class="text-secondary font-size-11">${log.auditTrail}</span>
+          ${photoHtml}
+          ${audioHtml}
         </div>
       </div>
     `;
   }).join('');
 }
+
+window.clearAllData = async function() {
+  window.showConfirmModal("Are you sure you want to completely erase all project data and logs from the database? This action is irreversible.", async () => {
+    try {
+      const response = await fetch('/api/reset', { method: 'POST' });
+      const result = await response.json();
+      if (result.success) {
+        window.showAlertModal("All database records have been erased successfully. Reloading dashboard.");
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      } else {
+        window.showAlertModal("Error erasing data: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error calling reset API:", error);
+      window.showAlertModal("Network error while trying to reset database.");
+    }
+  }, "Erase Database");
+};
 
 // Helper to keep page badges updated globally
 async function updatePendingReviewBadge() {
@@ -638,3 +677,56 @@ async function resetDatabase() {
   }
 }
 
+// Setup global project selector on load
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!window.location.pathname.endsWith('login.html')) {
+    await populateGlobalProjects();
+    
+    // Auto-refresh interval (every 4 seconds) for live updates
+    if (typeof loadDashboard === 'function' && document.getElementById('scheduleTable')) {
+      setInterval(loadDashboard, 4000);
+    }
+    if (typeof loadReviewQueue === 'function' && document.getElementById('reviewQueue')) {
+      setInterval(loadReviewQueue, 4000);
+    }
+  }
+});
+
+async function populateGlobalProjects() {
+  try {
+    const result = await fetchAPI('/api/projects');
+    if (result && Array.isArray(result)) {
+      const selectedProjectId = localStorage.getItem('selectedProjectId') || 'PROJ-1';
+      const userRole = localStorage.getItem('userRole');
+      const loggedInUser = localStorage.getItem('username') || 'oil-admin';
+
+      // Update sidebar project name for generic managers
+      if (userRole === 'manager' && !['arjun-manager', 'priya-manager', 'amit-manager'].includes(loggedInUser)) {
+        const assignedProjects = JSON.parse(localStorage.getItem('assignedProjects') || '[]');
+        const allowedProjects = result.filter(p => userRole === 'admin' || assignedProjects.includes(p.id));
+        const activeProj = allowedProjects.find(p => p.id === selectedProjectId) || allowedProjects[0] || result[0] || { name: 'No Active Project' };
+        
+        const profileNameEl = document.querySelector('.profile-name');
+        if (profileNameEl) {
+          profileNameEl.innerText = activeProj.name !== 'No Active Project' ? activeProj.name : "Project Overview";
+        }
+      }
+
+      const select = document.getElementById('globalProjectSelector');
+      if (select) {
+        let optionsHtml = '';
+        if (userRole === 'admin') {
+          optionsHtml = `<option value="ALL"${selectedProjectId === 'ALL' ? ' selected' : ''}>All Projects</option>`;
+        }
+        
+        optionsHtml += result.map(p => 
+          `<option value="${p.id}"${p.id === selectedProjectId ? ' selected' : ''}>${p.name}</option>`
+        ).join('');
+
+        select.innerHTML = optionsHtml;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load global projects:', e);
+  }
+}

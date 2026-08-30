@@ -1,0 +1,44 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.iml
+.cxx/
+
+# Python / General
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+.env.local
+
+# Build output
+dist/
+out/
+
+# Log files
+logs/
+*.log
+
+# temp
+temp/
+tmp/

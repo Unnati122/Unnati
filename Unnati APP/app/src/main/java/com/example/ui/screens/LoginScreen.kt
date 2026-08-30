@@ -58,6 +58,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -111,16 +119,39 @@ fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var workerIdInput by remember { mutableStateOf("WK-10245") }
-    var pinInput by remember { mutableStateOf("4892") }
+    var workerIdInput by remember { mutableStateOf("") }
+    var pinInput by remember { mutableStateOf("") }
     var pinVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var infoNotice by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var isBiometricAuthenticating by remember { mutableStateOf(false) }
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     val focusManager = LocalFocusManager.current
     val biometricStatus = remember(context) { BiometricAuthManager.getBiometricStatus(context) }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { _ ->
+        // Proceed with login anyway
+        viewModel.login(
+            workerId = workerIdInput,
+            pin = pinInput,
+            lat = null,
+            lon = null,
+            onSuccess = {
+                context.getSharedPreferences("unnati_prefs", Context.MODE_PRIVATE)
+                    .edit().putBoolean("first_login_done", true).apply()
+                isLoading = false
+                onLoginSuccess()
+            },
+            onError = { msg ->
+                isLoading = false
+                errorMessage = msg
+            }
+        )
+    }
 
     fun performLogin() {
         focusManager.clearFocus()
@@ -131,7 +162,11 @@ fun LoginScreen(
         viewModel.login(
             workerId = workerIdInput,
             pin = pinInput,
+            lat = null,
+            lon = null,
             onSuccess = {
+                context.getSharedPreferences("unnati_prefs", Context.MODE_PRIVATE)
+                    .edit().putBoolean("first_login_done", true).apply()
                 isLoading = false
                 onLoginSuccess()
             },
@@ -146,6 +181,12 @@ fun LoginScreen(
         focusManager.clearFocus()
         errorMessage = null
         infoNotice = null
+
+        val prefs = context.getSharedPreferences("unnati_prefs", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("first_login_done", false)) {
+            infoNotice = "Please sign in with your PIN for your first login to enable biometrics."
+            return
+        }
 
         val activity = context.findActivity()
         if (activity == null) {
@@ -326,55 +367,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Quick Worker Selector Chips (for demo convenience)
-            Text(
-                text = "Select Authorized Operator:",
-                fontSize = 11.5.sp,
-                fontWeight = FontWeight.Medium,
-                color = UxSecondaryText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 6.dp)
-            )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf("WK-10245 (Rajesh)", "WK-10882 (Amit)", "WK-11409 (Suresh)").forEach { item ->
-                    val idOnly = item.substringBefore(" ")
-                    val isSelected = workerIdInput.equals(idOnly, ignoreCase = true)
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(if (isSelected) UxOrangeLight else UxLightSurface)
-                            .border(
-                                1.dp,
-                                if (isSelected) UxOrange else UxBorder,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clickable {
-                                workerIdInput = idOnly
-                                errorMessage = null
-                                infoNotice = null
-                            }
-                            .padding(vertical = 8.dp, horizontal = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = item,
-                            fontSize = 10.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) UxOrange else UxPrimaryText,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
 
             // 1. Biometric Fast Unlock Card
             Surface(
@@ -518,7 +511,7 @@ fun LoginScreen(
                     errorMessage = null
                     infoNotice = null
                 },
-                label = { Text("PIN / Password") },
+                label = { Text("PIN") },
                 placeholder = { Text("4-digit security PIN") },
                 leadingIcon = {
                     Icon(

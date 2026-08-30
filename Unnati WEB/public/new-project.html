@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings - UNNATI (OIL)</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Core Design overrides -->
+  <link rel="stylesheet" href="app.css?v=6">
+  
+  <style>
+    .settings-card {
+      border: 1px solid #E2E8F0 !important;
+      border-radius: 12px;
+      background: #FFFFFF;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+    .settings-card-header {
+      background: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 16px 24px;
+    }
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .form-control, .form-select {
+      font-size: 13px;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      padding: 6px 12px;
+      color: #1E293B;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--gov-primary);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout" id="app-layout">
+    <!-- Main Workspace -->
+    <main class="main-workspace" style="overflow-y: auto; display: block;">
+      <div style="padding: 28px 32px;">
+        
+        
+        
+        
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.5px;">Create New Project</h2>
+            <p style="font-size: 13.5px; color: #64748B; margin: 0;">Provision a new operational environment and assign a Project Manager securely.</p>
+          </div>
+        </div>
+
+        <form id="newProjectForm" onsubmit="createProject(event)">
+          <div class="row g-4">
+            
+            <!-- Left Column: Project Details -->
+            <div class="col-lg-5">
+              <div class="card h-100" style="border:none; border-radius:12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow:hidden;">
+                <div class="card-header" style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-bottom: 1px solid #E2E8F0; padding: 20px 24px;">
+                  <h5 class="mb-0" style="color: #1E293B; font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 16px;">
+                    <i class="fa-solid fa-folder-plus text-primary me-2"></i>Project Information
+                  </h5>
+                </div>
+                <div class="card-body p-4" style="background: #FFFFFF;">
+                  <div class="mb-4">
+                    <label style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Project ID</label>
+                    <div style="position:relative;">
+                      <i class="fa-solid fa-hashtag" style="position:absolute; left:14px; top:12px; color:#94A3B8; font-size:13px;"></i>
+                      <input type="text" class="form-control" id="pId" placeholder="e.g. PROJ-4" required style="padding-left:36px; border-radius:8px; border:1px solid #E2E8F0; font-size:13.5px; height:42px;">
+                    </div>
+                  </div>
+                  <div class="mb-4">
+                    <label style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Project Name</label>
+                    <div style="position:relative;">
+                      <i class="fa-solid fa-building" style="position:absolute; left:14px; top:12px; color:#94A3B8; font-size:13px;"></i>
+                      <input type="text" class="form-control" id="pName" placeholder="e.g. Digboi Expansion" required style="padding-left:36px; border-radius:8px; border:1px solid #E2E8F0; font-size:13.5px; height:42px;">
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4 p-3 rounded" style="background:#F8FAFC; border:1px dashed #CBD5E1;">
+                    <p style="margin:0; font-size:12.5px; color:#64748B; line-height:1.5;">
+                      <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                      This project will be immediately visible in the global project selector once created.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Manager Details -->
+            <div class="col-lg-7">
+              <div class="card h-100" style="border:none; border-radius:12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow:hidden;">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border-bottom: 1px solid #FED7AA; padding: 20px 24px;">
+                  <h5 class="mb-0" style="color: #C2410C; font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 16px;">
+                    <i class="fa-solid fa-user-tie me-2"></i>Manager Credentials
+                  </h5>
+                  <span class="badge border" style="background-color: #FFFFFF !important; color: #0F172A !important; font-size:10px;"><i class="fa-solid fa-envelope text-success me-1"></i>Email Dispatched Instantly</span>
+                </div>
+                <div class="card-body p-4" style="background: #FFFFFF;">
+                  <p style="font-size:12.5px; color:#64748B; margin-bottom:24px;">These credentials grant full administrative access to the project. The details will be sent directly to the manager's email inbox.</p>
+                  
+                  <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                      <label style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Manager Name</label>
+                      <div style="position:relative;">
+                        <i class="fa-solid fa-user" style="position:absolute; left:14px; top:12px; color:#94A3B8; font-size:13px;"></i>
+                        <input type="text" class="form-control" id="mName" placeholder="e.g. Rahul Bose" required style="padding-left:36px; border-radius:8px; border:1px solid #E2E8F0; font-size:13.5px; height:42px;">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Manager Email</label>
+                      <div style="position:relative;">
+                        <i class="fa-solid fa-envelope" style="position:absolute; left:14px; top:12px; color:#94A3B8; font-size:13px;"></i>
+                        <input type="email" class="form-control" id="mEmail" placeholder="e.g. rahul@oilindia.in" required style="padding-left:36px; border-radius:8px; border:1px solid #E2E8F0; font-size:13.5px; height:42px;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                      <label style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Portal Username</label>
+                      <div style="position:relative;">
+                        <i class="fa-solid fa-id-badge" style="position:absolute; left:14px; top:12px; color:#94A3B8; font-size:13px;"></i>
+                        <input type="text" class="form-control" id="mUsername" placeholder="e.g. rahul-pm" required style="padding-left:36px; border-radius:8px; border:1px solid #E2E8F0; font-size:13.5px; height:42px;">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Temporary Password</label>
+                      <div style="position:relative;">
+                        <i class="fa-solid fa-lock" style="position:absolute; left:14px; top:12px; color:#94A3B8; font-size:13px;"></i>
+                        <input type="text" class="form-control" id="mPassword" placeholder="e.g. tempPass123!" required style="padding-left:36px; border-radius:8px; border:1px solid #E2E8F0; font-size:13.5px; height:42px;">
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-2 text-end">
+                    <button type="submit" id="submitBtn" class="btn btn-primary font-weight-bold" style="background: linear-gradient(135deg, var(--gov-primary) 0%, #EA580C 100%); border:none; padding: 12px 32px; border-radius: 8px; font-size: 14.5px; box-shadow: 0 4px 12px rgba(234,88,12,0.3); transition: transform 0.2s, box-shadow 0.2s; width:100%;">
+                      <span id="submitText"><i class="fa-solid fa-paper-plane me-2"></i>Provision Project & Email Credentials</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </form>
+
+        <!-- Projects Registry (Pause/Delete) -->
+        <div class="card mt-5 mb-5 shadow-sm border-0" style="border-radius:16px; background: #FFFFFF; overflow:hidden;">
+          <div class="card-header d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1px solid #F1F5F9; padding: 24px 32px;">
+            <h5 class="mb-0" style="color: #0F172A; font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 18px; letter-spacing: -0.3px;">
+              <i class="fa-solid fa-list-check text-primary me-2" style="background: rgba(14, 165, 233, 0.1); padding: 8px; border-radius: 8px; color: #0EA5E9 !important;"></i>Projects Registry
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <style>
+              .premium-table { margin-bottom: 0; width: 100%; border-collapse: separate; border-spacing: 0; }
+              .premium-table th { background: #F8FAFC; color: #64748B; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 16px 24px; border-bottom: 1px solid #E2E8F0; }
+              .premium-table td { padding: 20px 24px; color: #334155; font-size: 14px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; transition: background 0.2s ease; }
+              .premium-table tbody tr:hover td { background: #F8FAFC; }
+              .premium-table tbody tr:last-child td { border-bottom: none; }
+              .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.2px; }
+              .status-active { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+              .status-paused { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+              .status-deleted { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+              .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid transparent; transition: all 0.2s; background: #FFF; color: #64748B; cursor: pointer; }
+              .action-btn:hover { border-color: #E2E8F0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+              .action-btn.pause:hover { color: #F59E0B; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
+              .action-btn.play:hover { color: #10B981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+              .action-btn.delete:hover { color: #EF4444; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
+            </style>
+            <div class="table-responsive">
+              <table class="premium-table" id="projectsTable">
+                <thead>
+                  <tr>
+                    <th class="ps-4">Project Details</th>
+                    <th>Code</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading projects...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=6"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure only Admin can access this page
+      const role = localStorage.getItem('userRole');
+      if (role !== 'admin') {
+        alert('Access Denied: Only Administrators can create projects.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      renderSharedComponents('new-project');
+      loadProjects();
+    });
+
+    async function createProject(event) {
+      event.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitText');
+      const originalText = submitText.innerHTML;
+      
+      // Set loading state
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.8';
+      submitText.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Provisioning & Sending Email...';
+
+      const pId = document.getElementById('pId').value;
+      const pName = document.getElementById('pName').value;
+      const mName = document.getElementById('mName').value;
+      const mEmail = document.getElementById('mEmail').value;
+      const mUsername = document.getElementById('mUsername').value;
+      const mPassword = document.getElementById('mPassword').value;
+
+      const body = {
+        projectId: pId,
+        projectName: pName,
+        location: '',
+        client: '',
+        managerName: mName,
+        managerEmail: mEmail,
+        managerUsername: mUsername,
+        managerPassword: mPassword
+      };
+
+      const result = await fetchAPI('/api/admin/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      // Restore button state
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitText.innerHTML = originalText;
+
+      if (result && result.success) {
+        showSuccessToast(result.message || 'Project and Manager provisioned successfully.');
+        document.getElementById('newProjectForm').reset();
+        loadProjects();
+      }
+    }
+
+    function showSuccessToast(message) {
+      let toast = document.getElementById('customSuccessToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'customSuccessToast';
+        toast.style.cssText = `
+          position: fixed; top: 50%; left: 50%;
+          background: #FFFFFF; color: #0F172A; padding: 32px 48px; border-radius: 20px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.1); z-index: 9999;
+          display: flex; flex-direction: column; align-items: center; gap: 16px;
+          transform: translate(-50%, -50%) perspective(400px) rotateX(90deg); opacity: 0; 
+          transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          font-family: 'Outfit', sans-serif; text-align: center;
+        `;
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = `
+        <div style="background: rgba(16, 185, 129, 0.1); color: #10B981; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+          <i class="fa-solid fa-check" style="font-size: 32px;"></i>
+        </div>
+        <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Success!</div>
+      `;
+      
+      // Animate in (Flip down)
+      setTimeout(() => {
+        toast.style.transform = 'translate(-50%, -50%) perspective(400px) rotateX(0deg)';
+        toast.style.opacity = '1';
+      }, 10);
+      
+      // Animate out (Flip up)
+      setTimeout(() => {
+        toast.style.transform = 'translate(-50%, -50%) perspective(400px) rotateX(-90deg)';
+        toast.style.opacity = '0';
+      }, 2500);
+    }
+
+    async function loadProjects() {
+      const projects = await fetchAPI('/api/projects');
+      const tbody = document.querySelector('#projectsTable tbody');
+      if (!tbody) return;
+
+      if (!projects || projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No projects found in the system.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = projects.map(p => {
+        let statusBadge = '<span class="status-badge status-active"><i class="fa-solid fa-circle-check me-1"></i>Active</span>';
+        if (p.status === 'paused') statusBadge = '<span class="status-badge status-paused"><i class="fa-solid fa-circle-pause me-1"></i>Paused</span>';
+        if (p.status === 'deleted') statusBadge = '<span class="status-badge status-deleted"><i class="fa-solid fa-circle-xmark me-1"></i>Deleted</span>';
+
+        return `
+          <tr>
+            <td class="ps-4">
+              <div class="fw-bold" style="color: #0F172A; font-size: 14.5px;">${p.name}</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">${p.client || 'Internal'}</div>
+            </td>
+            <td><span style="background: #F1F5F9; color: #475569; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: 500;">${p.code}</span></td>
+            <td>
+              <div class="d-flex align-items-center" style="color: #64748B;">
+                <i class="fa-solid fa-location-dot me-2 text-muted"></i>${p.location || 'Not Specified'}
+              </div>
+            </td>
+            <td>${statusBadge}</td>
+            <td class="text-end pe-4">
+              <div class="d-flex justify-content-end gap-2">
+                ${p.status !== 'active' ? 
+                  `<button class="action-btn play" onclick="updateProjectStatus('${p.id}', 'active')" title="Activate"><i class="fa-solid fa-play"></i></button>` : 
+                  `<button class="action-btn pause" onclick="updateProjectStatus('${p.id}', 'paused')" title="Pause"><i class="fa-solid fa-pause"></i></button>`
+                }
+                ${p.status !== 'deleted' ? 
+                  `<button class="action-btn delete" onclick="updateProjectStatus('${p.id}', 'deleted')" title="Delete/Archive"><i class="fa-solid fa-trash-can"></i></button>` : ''
+                }
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function updateProjectStatus(id, newStatus) {
+      if (newStatus === 'deleted' && !confirm('Are you sure you want to permanently delete/archive this project? All associated managers and workers will lose access immediately.')) {
+        return;
+      }
+      if (newStatus === 'paused' && !confirm('Pause project? All associated users will be temporarily locked out.')) {
+        return;
+      }
+
+      let result;
+      if (newStatus === 'deleted') {
+        result = await fetchAPI(`/api/admin/projects/${id}`, {
+          method: 'DELETE'
+        });
+      } else {
+        result = await fetchAPI(`/api/admin/projects/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      }
+
+      if (result && result.success) {
+        showSuccessToast(result.message || 'Project status updated successfully.');
+        loadProjects();
+      }
+    }
+  </script>
+</body>
+</html>
+

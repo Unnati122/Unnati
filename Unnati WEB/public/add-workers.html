@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings - UNNATI (OIL)</title>
+  
+  <!-- UX4G Design System CSS -->
+  <link rel="stylesheet" href="https://cdn.ux4g.gov.in/UX4G@3.0.18/index.css">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Core Design overrides -->
+  <link rel="stylesheet" href="app.css?v=6">
+  <style>
+    .page-header { padding: 0 0 20px 0; border-bottom: 1px solid #E2E8F0; margin-bottom: 24px; }
+    .page-header h2 { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700; color: #0F172A; margin: 0 0 4px; }
+    .page-header p { font-size: 13.5px; color: #64748B; margin: 0; }
+
+    .panel { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; }
+    .panel-header { padding: 14px 20px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; }
+    .panel-header h3 { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; color: #0F172A; margin: 0; }
+    .panel-body { padding: 20px; }
+    .panel-body-flush { padding: 0; }
+
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .field-input { width: 100%; font-size: 13.5px; border: 1px solid #D1D5DB; border-radius: 7px; padding: 9px 12px; color: #111827; background: #fff; outline: none; transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box; }
+    .field-input:focus { border-color: #D85800; box-shadow: 0 0 0 3px rgba(216,88,0,0.1); }
+
+    .btn-create { display: block; width: 100%; padding: 10px; background: #D85800; color: #fff; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .btn-create:hover { background: #B84500; }
+
+    .hint { font-size: 12.5px; color: #6B7280; margin: 0 0 18px; line-height: 1.5; }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead tr { background: #F9FAFB; }
+    .data-table thead th { padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 1px solid #E5E7EB; white-space: nowrap; }
+    .data-table tbody td { padding: 12px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: #F9FAFB; }
+    .data-table td:last-child { white-space: nowrap; }
+
+    .worker-name { font-weight: 600; font-size: 13.5px; color: #111827; }
+    .worker-email { font-size: 12px; color: #6B7280; margin-top: 1px; }
+    .monospace { font-family: 'Courier New', monospace; font-size: 13px; background: #F3F4F6; padding: 2px 7px; border-radius: 4px; }
+
+    .badge-active { display: inline-flex; align-items: center; gap: 5px; background: #ECFDF5; color: #065F46; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .badge-paused { display: inline-flex; align-items: center; gap: 5px; background: #FFF7ED; color: #92400E; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+    .action-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #fff; cursor: pointer; font-size: 12px; transition: all 0.15s; }
+    .action-btn:hover { background: #F9FAFB; }
+    .action-btn.edit:hover { border-color: #D85800; color: #D85800; }
+    .action-btn.pause:hover { border-color: #F59E0B; color: #F59E0B; }
+    .action-btn.delete:hover { border-color: #EF4444; color: #EF4444; }
+
+    .btn-refresh { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border: 1px solid #E5E7EB; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; }
+    .btn-refresh:hover { border-color: #D85800; color: #D85800; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-group { margin-bottom: 14px; }
+
+    .success-box { text-align: center; padding: 24px 16px; }
+    .success-icon { width: 56px; height: 56px; background: #D1FAE5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 24px; color: #059669; }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout" id="app-layout">
+    <main class="main-workspace" style="overflow-y: auto; background: #F8FAFC;">
+      <div style="padding: 28px 32px; max-width: 100%;">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <h2>Add Field Workers</h2>
+          <p>Provision mobile app access for field staff. Credentials are emailed automatically.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start;">
+
+          <!-- LEFT: Create Worker Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-user-plus" style="color: #D85800; margin-right: 8px;"></i>New Worker</h3>
+            </div>
+            <div class="panel-body">
+              <form id="addWorkerForm" onsubmit="createWorker(event)">
+                <p class="hint">Credentials will be emailed directly to the worker immediately after creation.</p>
+
+                <div class="field-group">
+                  <label class="field-label">Full Name</label>
+                  <input class="field-input" type="text" id="wName" placeholder="e.g. Amit Singh" required>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Email Address</label>
+                  <input class="field-input" type="email" id="wEmail" placeholder="e.g. amit@oilindia.in" required>
+                </div>
+                <div class="field-row">
+                  <div class="field-group">
+                    <label class="field-label">Worker ID</label>
+                    <input class="field-input" type="text" id="wUsername" required>
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Login PIN</label>
+                    <input class="field-input" type="text" id="wPassword" maxlength="4" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn-create">
+                  <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i>Create &amp; Email Credentials
+                </button>
+              </form>
+
+              <div id="successState" style="display: none;">
+                <div class="success-box">
+                  <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+                  <div style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px;">Worker Created!</div>
+                  <div style="font-size: 13px; color: #6B7280; margin-bottom: 18px;">Credentials have been emailed securely.</div>
+                  <button class="btn-refresh" onclick="document.getElementById('successState').style.display='none'; document.getElementById('addWorkerForm').style.display='block'; document.getElementById('addWorkerForm').reset(); generateWorkerCredentials();">
+                    <i class="fa-solid fa-plus"></i> Add Another
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Workers Table Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-users" style="color: #D85800; margin-right: 8px;"></i>Provisioned Workers</h3>
+              <button class="btn-refresh" onclick="loadWorkers()">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+              </button>
+            </div>
+            <div class="panel-body-flush">
+              <div style="overflow-x: auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Worker</th>
+                      <th>Worker ID</th>
+                      <th>Contact</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="workerListTableBody">
+                    <tr>
+                      <td colspan="5" style="text-align: center; padding: 40px; color: #9CA3AF;">Loading workers...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Worker Modal -->
+  <div class="modal" id="editWorkerModal" tabindex="-1" style="display: none; background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title font-weight-bold" style="font-family: 'Outfit', sans-serif;">Edit Worker Profile</h5>
+          <button type="button" class="btn-close" onclick="closeEditModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editWorkerForm" onsubmit="saveWorkerEdit(event)">
+            <input type="hidden" id="editUsername">
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="editName" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="editEmail" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Mobile Number</label>
+              <input type="text" class="form-control" id="editPhone" placeholder="+91 ...">
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Digital ID (Aadhaar/Gov ID)</label>
+              <input type="text" class="form-control" id="editDigitalId" placeholder="XXXX-XXXX-XXXX">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" style="background:var(--gov-primary); border:none;">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.ux4g.gov.in/UX4G@3.0.18/ux4g.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js?v=6"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure Admin or Manager can access this page
+      const role = localStorage.getItem('userRole');
+      if (role !== 'admin' && role !== 'manager') {
+        alert('Access Denied: Only Administrators and Managers can access this page.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      renderSharedComponents('add-workers');
+      updatePendingReviewBadge();
+      
+      generateWorkerCredentials();
+      loadWorkers();
+    });
+
+
+    function generateWorkerCredentials() {
+      const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+      document.getElementById('wUsername').value = `W-${randomId}`;
+      
+      const randomPin = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('wPassword').value = randomPin.toString();
+    }
+
+    // Sync with the global project selector change in header
+    window.addEventListener('projectChanged', (e) => {
+      loadWorkers();
+    });
+
+    async function createWorker(event) {
+      event.preventDefault();
+      
+      const workerName = document.getElementById('wName').value.trim();
+      const workerEmail = document.getElementById('wEmail').value.trim();
+      const workerUsername = document.getElementById('wUsername').value.trim();
+      const workerPassword = document.getElementById('wPassword').value.trim();
+
+      const btn = event.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Provisioning...';
+      btn.disabled = true;
+
+      try {
+        const result = await fetchAPI('/api/manager/workers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workerName, workerUsername, workerEmail, workerPassword })
+        });
+
+        if (result && result.success) {
+          document.getElementById('addWorkerForm').style.display = 'none';
+          document.getElementById('successState').style.display = 'block';
+          loadWorkers();
+        } else if (result && result.error) {
+          alert('Error: ' + result.error);
+        }
+      } catch (err) {
+        console.error('Failed to create worker:', err);
+        alert('Connection error. Could not provision worker.');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    async function loadWorkers() {
+      const tbody = document.getElementById('workerListTableBody');
+      try {
+        const workers = await fetchAPI('/api/manager/workers');
+        if (!workers || workers.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No workers provisioned yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = workers.map(w => {
+          const statusBadge = w.status === 'active' 
+            ? '<span class="badge-active"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Active</span>'
+            : '<span class="badge-paused"><i class="fa-solid fa-pause" style="font-size:8px;"></i> Paused</span>';
+          
+          return `
+            <tr>
+              <td>
+                <div class="worker-name">${w.name}</div>
+                <div class="worker-email">${w.email}</div>
+              </td>
+              <td><span class="monospace">${w.username}</span></td>
+              <td>
+                <div style="font-size: 12.5px; color: #374151; margin-bottom:2px;"><i class="fa-solid fa-phone" style="color:#9CA3AF; margin-right:5px;"></i>${w.phone || '<span style="color:#9CA3AF;font-style:italic;">Not Set</span>'}</div>
+                <div style="font-size: 12.5px; color: #374151;"><i class="fa-solid fa-id-card" style="color:#9CA3AF; margin-right:5px;"></i>${w.digital_id || '<span style="color:#9CA3AF;font-style:italic;">Not Set</span>'}</div>
+              </td>
+              <td>${statusBadge}</td>
+              <td style="display:flex; gap:6px;">
+                <button class="action-btn edit" onclick="openEditModal('${w.username}', '${w.name}', '${w.email}', '${w.phone || ''}', '${w.digital_id || ''}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn pause" onclick="toggleWorkerStatus('${w.username}', '${w.status}')" title="${w.status === 'active' ? 'Pause' : 'Resume'}"><i class="fa-solid ${w.status === 'active' ? 'fa-pause' : 'fa-play'}"></i></button>
+                <button class="action-btn delete" onclick="deleteWorker('${w.username}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Failed to load workers:', err);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">Failed to load workers.</td></tr>';
+      }
+    }
+
+    function openEditModal(username, name, email, phone, digitalId) {
+      document.getElementById('editUsername').value = username;
+      document.getElementById('editName').value = name;
+      document.getElementById('editEmail').value = email;
+      document.getElementById('editPhone').value = phone;
+      document.getElementById('editDigitalId').value = digitalId;
+      document.getElementById('editWorkerModal').style.display = 'block';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editWorkerModal').style.display = 'none';
+    }
+
+    async function saveWorkerEdit(event) {
+      event.preventDefault();
+      const username = document.getElementById('editUsername').value;
+      const name = document.getElementById('editName').value;
+      const email = document.getElementById('editEmail').value;
+      const phone = document.getElementById('editPhone').value;
+      const digitalId = document.getElementById('editDigitalId').value;
+
+      try {
+        const result = await fetchAPI(`/api/manager/workers/${username}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, digitalId })
+        });
+        if (result && result.success) {
+          closeEditModal();
+          loadWorkers();
+        } else {
+          alert('Error: ' + (result?.error || 'Failed to update details'));
+        }
+      } catch (err) {
+        alert('Connection error.');
+      }
+    }
+
+    async function toggleWorkerStatus(username, currentStatus) {
+      const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+      try {
+        const result = await fetchAPI(`/api/manager/workers/${username}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (result && result.success) {
+          loadWorkers(); // Refresh
+        } else {
+          alert('Error: ' + (result?.error || 'Failed to update status'));
+        }
+      } catch (err) {
+        alert('Connection error.');
+      }
+    }
+
+    async function deleteWorker(username) {
+      if (!confirm(`Are you sure you want to permanently delete worker ${username}? This action cannot be undone.`)) {
+        return;
+      }
+      try {
+        const result = await fetchAPI(`/api/manager/workers/${username}`, {
+          method: 'DELETE'
+        });
+        if (result && result.success) {
+          loadWorkers(); // Refresh
+        } else {
+          alert('Error: ' + (result?.error || 'Failed to delete worker'));
+        }
+      } catch (err) {
+        alert('Connection error.');
+      }
+    }
+  </script>
+</body>
+</html>
+

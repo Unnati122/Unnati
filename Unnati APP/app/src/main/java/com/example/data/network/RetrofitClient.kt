@@ -9,8 +9,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-
-    private const val DEFAULT_URL = "https://unnati-lk1f.onrender.com/"
+    private const val DEFAULT_URL = "http://10.121.7.0:3005/"
     
     var baseUrl: String = DEFAULT_URL
         set(value) {

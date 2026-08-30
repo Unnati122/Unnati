@@ -121,6 +121,13 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
     )
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
+    // Out of Location State (Continuous Geofence)
+    private val _isOutOfLocation = MutableStateFlow(false)
+    val isOutOfLocation: StateFlow<Boolean> = _isOutOfLocation.asStateFlow()
+    
+    private val _outOfLocationMessage = MutableStateFlow<String?>(null)
+    val outOfLocationMessage: StateFlow<String?> = _outOfLocationMessage.asStateFlow()
+
     // Current Active Project (OIL Pipeline Expansion)
     private val _selectedProject = MutableStateFlow(
         Project(
@@ -161,6 +168,14 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _previewProgress = MutableStateFlow(0f)
     val previewProgress: StateFlow<Float> = _previewProgress.asStateFlow()
+
+    // Captured Site Photo File State
+    private val _capturedPhotoFile = MutableStateFlow<File?>(null)
+    val capturedPhotoFile: StateFlow<File?> = _capturedPhotoFile.asStateFlow()
+
+    fun setCapturedPhotoFile(file: File?) {
+        _capturedPhotoFile.value = file
+    }
 
     // Projects & Workers from DB
     val allProjects: StateFlow<List<Project>> = repository.allProjects
@@ -219,7 +234,7 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
     private var playbackJob: Job? = null
 
     // Login worker
-    fun login(workerId: String, pin: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun login(workerId: String, pin: String, lat: Double?, lon: Double?, onSuccess: () -> Unit, onError: (String) -> Unit) {
         val trimmedId = workerId.trim()
         if (trimmedId.isBlank()) {
             onError("Please enter your Worker ID")
@@ -227,13 +242,13 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = RetrofitClient.apiService.login(LoginRequest(trimmedId, pin))
+                val response = RetrofitClient.apiService.login(LoginRequest(trimmedId, pin, lat, lon))
                 if (response.isSuccessful && response.body() != null) {
                     val body = response.body()!!
                     RetrofitClient.token = body.token
                     
                     val u = body.user
-                    repository.saveAuthenticatedWorker(u.username, u.name, u.role, u.responsibility, u.assignedProjects)
+                    repository.saveAuthenticatedWorker(u.username, u.name, u.role, u.responsibility, u.assignedProjects, u.phone, u.digitalId, u.projectDetails)
                     
                     val pId = if (u.assignedProjects.isNotEmpty()) u.assignedProjects[0] else "PROJ-1"
                     val savedWorker = database.workerDao().getWorkerById(u.username)?.toDomainModel()
@@ -259,30 +274,20 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
                     
                     repository.syncMyUpdates()
                 } else {
+                    val errorString = response.errorBody()?.string()
+                    val errorMessage = try {
+                        org.json.JSONObject(errorString!!).getString("error")
+                    } catch (e: Exception) {
+                        "Invalid credentials. Please verify your Worker ID and PIN."
+                    }
                     launch(Dispatchers.Main) {
-                        onError("Invalid credentials. Please verify your Worker ID and PIN.")
+                        onError(errorMessage)
                     }
                 }
             } catch (e: Exception) {
-                Log.e("TimeAgentViewModel", "Network login error", e)
-                // Fallback offline login for demo convenience if server is offline
-                val foundWorker = allWorkers.value.find { it.workerId.equals(trimmedId, ignoreCase = true) }
-                if (foundWorker != null && pin == "4892") {
-                    launch(Dispatchers.Main) {
-                        _selectedWorker.value = foundWorker
-                        prefs.edit()
-                            .putBoolean("key_is_authenticated", true)
-                            .putString("key_logged_in_worker_id", foundWorker.workerId)
-                            .apply()
-                        _isAuthenticated.value = true
-                        _currentTab.value = AppTab.HOME
-                        _currentScreen.value = AppScreen.MAIN
-                        onSuccess()
-                    }
-                } else {
-                    launch(Dispatchers.Main) {
-                        onError("Connection error: Unable to reach the server. Please try again.")
-                    }
+                android.util.Log.e("TimeAgentViewModel", "Network login error", e)
+                launch(Dispatchers.Main) {
+                    onError("Network error: Could not connect to server or invalid response.")
                 }
             }
         }
@@ -290,10 +295,20 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
 
     // Biometric Login (Fingerprint / Face Unlock)
     fun loginWithBiometrics(workerId: String? = null, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val targetId = workerId?.trim()?.ifBlank { null } ?: _selectedWorker.value.workerId
+        val targetId = workerId?.trim()?.ifBlank { null } ?: prefs.getString("key_logged_in_worker_id", null)
+        
+        if (targetId == null) {
+            onError("No previous session found. Please log in with your credentials first.")
+            return
+        }
+
         val savedToken = prefs.getString("key_auth_token", null)
         val foundWorker = allWorkers.value.find { it.workerId.equals(targetId, ignoreCase = true) }
-            ?: _selectedWorker.value
+        
+        if (foundWorker == null) {
+            onError("User data not found. Please log in with your credentials first.")
+            return
+        }
             
         RetrofitClient.token = savedToken
         _selectedWorker.value = foundWorker
@@ -310,6 +325,73 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
             repository.syncMyUpdates()
         }
         onSuccess()
+    }
+
+    // Continuous Location Check
+    fun checkLocation(context: android.content.Context) {
+        if (!_isAuthenticated.value) return // Only check if logged in
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val location = getFreshLocation(context)
+                android.util.Log.d("TimeAgentViewModel", "checkLocation: lat=${location?.latitude}, lon=${location?.longitude}")
+
+                val request = com.example.data.network.VerifyLocationRequest(
+                    latitude = location?.latitude,
+                    longitude = location?.longitude
+                )
+
+                val response = RetrofitClient.apiService.verifyLocation(request)
+                if (response.isSuccessful && response.body() != null) {
+                    val body = response.body()!!
+                    android.util.Log.d("TimeAgentViewModel", "checkLocation response: allowed=${body.allowed}, message=${body.message}")
+                    launch(Dispatchers.Main) {
+                        _isOutOfLocation.value = !body.allowed
+                        _outOfLocationMessage.value = body.message
+                    }
+                } else if (response.code() == 401) {
+                    // Token expired — force re-login, don't just show location error
+                    android.util.Log.w("TimeAgentViewModel", "checkLocation: 401 unauthorized, logging out")
+                    launch(Dispatchers.Main) {
+                        logout()
+                    }
+                } else {
+                    // Other API error — don't lock the user out, log it silently
+                    android.util.Log.w("TimeAgentViewModel", "checkLocation: API error ${response.code()}: ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                // Network error (no connection etc.) — don't lock user out
+                android.util.Log.e("TimeAgentViewModel", "checkLocation network error (ignored): ${e.message}")
+            }
+        }
+    }
+
+    suspend fun getFreshLocation(context: android.content.Context): android.location.Location? {
+        return try {
+            val locationManager = context.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+            var best: android.location.Location? = null
+
+            val providers = listOf(
+                android.location.LocationManager.GPS_PROVIDER,
+                android.location.LocationManager.NETWORK_PROVIDER,
+                android.location.LocationManager.PASSIVE_PROVIDER
+            )
+            for (provider in providers) {
+                try {
+                    val loc = locationManager.getLastKnownLocation(provider)
+                    if (loc != null) {
+                        if (best == null || loc.accuracy < best.accuracy) {
+                            best = loc
+                        }
+                    }
+                } catch (_: SecurityException) {}
+                  catch (_: Exception) {}
+            }
+            android.util.Log.d("TimeAgentViewModel", "getFreshLocation: best=$best")
+            best
+        } catch (e: Exception) {
+            android.util.Log.e("TimeAgentViewModel", "getFreshLocation exception", e)
+            null
+        }
     }
 
     // Logout
@@ -330,6 +412,7 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
     fun startVoiceRecording() {
         stopPlayback()
         _pendingRecordingResult.value = null
+        _capturedPhotoFile.value = null
         _isProcessingUpdate.value = false
         recordingManager.startRecording(_selectedProject.value.name)
     }
@@ -338,6 +421,7 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
     fun cancelVoiceRecording() {
         stopPlayback()
         _pendingRecordingResult.value = null
+        _capturedPhotoFile.value = null
         _isProcessingUpdate.value = false
         recordingManager.cancelRecording()
     }
@@ -358,6 +442,13 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
                 File(pending.audioFilePath).delete()
             } catch (e: Exception) {}
         }
+        val photo = _capturedPhotoFile.value
+        if (photo != null) {
+            try {
+                photo.delete()
+            } catch (e: Exception) {}
+        }
+        _capturedPhotoFile.value = null
         _pendingRecordingResult.value = null
         recordingManager.reset()
     }
@@ -427,8 +518,10 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
     // Confirm & Submit Voice Update to Database and Schedule linking engine
     fun confirmAndSubmitRecording(onComplete: (VoiceUpdate) -> Unit) {
         val result = _pendingRecordingResult.value ?: return
+        val photoFile = _capturedPhotoFile.value
         stopPlayback()
         _pendingRecordingResult.value = null
+        _capturedPhotoFile.value = null
         _isProcessingUpdate.value = true
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -438,7 +531,8 @@ class TimeAgentViewModel(application: Application) : AndroidViewModel(applicatio
                 durationSeconds = result.durationSeconds,
                 transcript = result.transcript,
                 waveform = result.waveform,
-                audioFilePath = result.audioFilePath
+                audioFilePath = result.audioFilePath,
+                photoFilePath = photoFile?.absolutePath
             )
             _lastSubmittedUpdate.value = savedUpdate
             delay(900) // Brief smooth AI schedule-linking layer processing

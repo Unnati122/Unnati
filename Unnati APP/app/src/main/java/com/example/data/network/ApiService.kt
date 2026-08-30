@@ -14,6 +14,9 @@ interface ApiService {
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
+    @POST("api/auth/verify-location")
+    suspend fun verifyLocation(@Body request: VerifyLocationRequest): Response<VerifyLocationResponse>
+
     @GET("api/me")
     suspend fun getMe(): Response<NetworkUser>
 
@@ -27,6 +30,7 @@ interface ApiService {
     @POST("api/voice/upload")
     suspend fun uploadVoice(
         @Part audio: MultipartBody.Part,
+        @Part photo: MultipartBody.Part?,
         @Part("durationSeconds") durationSeconds: RequestBody,
         @Part("waveformCsv") waveformCsv: RequestBody,
         @Part("transcript") transcript: RequestBody

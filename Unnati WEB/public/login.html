@@ -199,30 +199,38 @@
       position: relative;
       display: flex;
       align-items: center;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 8px;
+      background: #FFFFFF;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .input-wrapper:focus-within {
+      border-color: var(--gov-primary);
+      box-shadow: 0 0 0 3px rgba(216, 88, 0, 0.08);
     }
 
-    .input-wrapper i {
+    .input-wrapper > i {
       position: absolute;
       left: 16px;
       color: #94A3B8;
       font-size: 14px;
+      z-index: 10;
+      pointer-events: none;
     }
 
     .input-wrapper input {
       width: 100%;
-      padding: 12px 16px 12px 42px;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 8px;
+      box-sizing: border-box;
+      padding: 12px 42px 12px 42px;
+      border: none;
+      background: transparent;
       font-size: 13.5px;
       color: #334155;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
       font-family: 'Inter', sans-serif;
-    }
-
-    .input-wrapper input:focus {
-      border-color: var(--gov-primary);
-      box-shadow: 0 0 0 3px rgba(216, 88, 0, 0.08);
+      z-index: 1;
+      position: relative;
     }
 
     .toggle-pass-btn {
@@ -234,6 +242,7 @@
       cursor: pointer;
       font-size: 14px;
       padding: 0;
+      z-index: 10;
     }
     .toggle-pass-btn:hover {
       color: #475569;
@@ -346,21 +355,21 @@
             <label for="username">Username / Email</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-user"></i>
-              <input type="text" id="username" placeholder="Enter username (e.g. oil-admin)" required value="oil-admin">
+              <input type="text" id="username" placeholder="Enter username or email" required>
             </div>
           </div>
 
           <div class="form-group">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <label for="password" class="mb-0">Password</label>
-              <a href="#" class="text-decoration-none font-weight-semibold" style="font-size: 11.5px; color: var(--gov-primary);" onclick="alert('Please contact your administrator to reset password.')">Forgot password?</a>
-            </div>
-            <div class="input-wrapper">
+            <label for="password">Password</label>
+            <div class="input-wrapper mb-2">
               <i class="fa-solid fa-lock"></i>
-              <input type="password" id="password" placeholder="Enter password" required value="password">
+              <input type="password" id="password" placeholder="Enter password" required>
               <button type="button" class="toggle-pass-btn" onclick="togglePasswordVisibility()">
                 <i class="fa-solid fa-eye" id="passEyeIcon"></i>
               </button>
+            </div>
+            <div class="text-end">
+              <a href="#" class="text-decoration-none font-weight-semibold" style="font-size: 11.5px; color: var(--gov-primary);" onclick="openForgotModal()">Forgot password?</a>
             </div>
           </div>
 
@@ -374,23 +383,11 @@
 
         <div style="margin-top: 24px; border-top: 1px solid #E2E8F0; padding-top: 16px;">
           <label style="font-size: 11px; font-weight: 700; color: #64748B; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-            <i class="fa-solid fa-bolt text-warning me-1"></i> Quick Demo Logins
+            <i class="fa-solid fa-bolt text-warning me-1"></i> Quick Demo Login
           </label>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <button type="button" class="quick-login-btn" onclick="quickLogin('oil-admin')">
-              💼 Admin
-            </button>
-            <button type="button" class="quick-login-btn" onclick="quickLogin('arjun-manager')">
-              📊 PM
-            </button>
-            <button type="button" class="quick-login-btn" onclick="quickLogin('rahul-hse')">
-              🛡️ HSE
-            </button>
-            <button type="button" class="quick-login-btn" onclick="quickLogin('amit-ops')">
-              ⚙️ Ops
-            </button>
-            <button type="button" class="quick-login-btn" onclick="quickLogin('field-user-1')">
-              👷 Field
+            <button type="button" class="quick-login-btn" onclick="quickLogin('paramjitbaral@gmail.com', 'Swaraj@0405')">
+              💼 Admin (Paramjit)
             </button>
           </div>
         </div>
@@ -400,13 +397,158 @@
 
   </div>
 
+  <!-- Forgot Password Modal Overlay -->
+  <style>
+    .custom-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1050;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-modal-dialog {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .custom-modal-overlay.show {
+      display: flex;
+    }
+    .custom-modal-overlay.show .custom-modal-dialog {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .custom-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .custom-modal-title {
+      font-weight: 600;
+      font-size: 16px;
+      margin: 0;
+      color: #0f172a;
+    }
+    .custom-modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .custom-modal-close:hover {
+      color: #0f172a;
+    }
+    .custom-modal-body {
+      padding: 24px;
+    }
+    .custom-form-label {
+      font-size: 12px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+    .custom-form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    .custom-form-control:focus {
+      outline: none;
+      border-color: var(--gov-primary);
+      box-shadow: 0 0 0 3px rgba(216, 88, 0, 0.1);
+    }
+    .custom-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #ffffff;
+      transition: background 0.2s;
+    }
+    .custom-btn-primary { background-color: var(--gov-primary); }
+    .custom-btn-primary:hover { background-color: var(--gov-primary-light); }
+    .custom-btn-success { background-color: #10b981; }
+    .custom-btn-success:hover { background-color: #059669; }
+    .custom-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+  </style>
+
+  <div class="custom-modal-overlay" id="forgotPasswordModal">
+    <div class="custom-modal-dialog">
+      <div class="custom-modal-header">
+        <h5 class="custom-modal-title">Reset Password</h5>
+        <button type="button" class="custom-modal-close" onclick="closeForgotModal()">&times;</button>
+      </div>
+      <div class="custom-modal-body">
+        
+        <!-- Step 1: Request OTP -->
+        <div id="fp-step-1">
+          <p style="font-size: 14px; color: #475569; margin-bottom: 16px; margin-top: 0;">Enter your registered email address and we'll send you an OTP to reset your password.</p>
+          <div>
+            <label class="custom-form-label">Email Address</label>
+            <input type="email" id="fp-email" class="custom-form-control" placeholder="user@example.com">
+          </div>
+          <button class="custom-btn custom-btn-primary" onclick="requestOTP()">Send OTP</button>
+        </div>
+
+        <!-- Step 2: Verify OTP & Reset -->
+        <div id="fp-step-2" style="display: none;">
+          <p style="font-size: 14px; color: #475569; margin-bottom: 16px; margin-top: 0;">Check your email for the 6-digit OTP code.</p>
+          <div>
+            <label class="custom-form-label">OTP Code</label>
+            <input type="text" id="fp-otp" class="custom-form-control" placeholder="123456" maxlength="6">
+          </div>
+          <div>
+            <label class="custom-form-label">New Password</label>
+            <input type="password" id="fp-new-pass" class="custom-form-control" placeholder="Enter new password">
+          </div>
+          <button class="custom-btn custom-btn-success" onclick="resetPassword()">Reset Password</button>
+        </div>
+
+        <!-- Step 3: Success -->
+        <div id="fp-step-3" style="display: none; text-align: center; padding: 20px 0;">
+          <div style="width: 80px; height: 80px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <i class="fa-solid fa-check" style="font-size: 40px; color: #10b981;"></i>
+          </div>
+          <h4 style="color: #0f172a; margin-bottom: 8px; font-weight: 700;">Success!</h4>
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Your password has been successfully reset.</p>
+          <button class="custom-btn custom-btn-primary" onclick="closeForgotModal()">Back to Login</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script>
-    window.quickLogin = function(username) {
-      document.getElementById('username').value = username;
-      document.getElementById('password').value = 'password';
-      const mockEvent = { preventDefault: () => {} };
-      handleLogin(mockEvent);
-    };
+    function quickLogin(user, pass) {
+      document.getElementById('username').value = user;
+      document.getElementById('password').value = pass;
+    }
 
     function togglePasswordVisibility() {
       const passInput = document.getElementById('password');
@@ -426,7 +568,7 @@
       const pass = document.getElementById('password').value.trim();
       
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('http://localhost:3005/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: user, password: pass })
@@ -460,7 +602,89 @@
         }
       } catch (err) {
         console.error('Login connection error:', err);
-        alert('Could not reach backend server. Please verify it is running on port 3000.');
+        alert('Could not reach backend server. Please verify it is running on port 3005.');
+      }
+    }
+
+    function openForgotModal() {
+      document.getElementById('fp-step-1').style.display = 'block';
+      document.getElementById('fp-step-2').style.display = 'none';
+      document.getElementById('fp-step-3').style.display = 'none';
+      document.getElementById('fp-email').value = '';
+      document.getElementById('fp-otp').value = '';
+      document.getElementById('fp-new-pass').value = '';
+      
+      const modal = document.getElementById('forgotPasswordModal');
+      modal.classList.add('show');
+    }
+
+    function closeForgotModal() {
+      const modal = document.getElementById('forgotPasswordModal');
+      modal.classList.remove('show');
+    }
+
+    async function requestOTP() {
+      const email = document.getElementById('fp-email').value.trim();
+      if (!email) return alert('Please enter your email.');
+      
+      const btn = event.target;
+      const originalText = btn.innerText;
+      btn.innerText = 'Sending...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('http://localhost:3005/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('fp-step-1').style.display = 'none';
+          document.getElementById('fp-step-2').style.display = 'block';
+        } else {
+          alert(data.error || 'Failed to send OTP.');
+        }
+      } catch (err) {
+        alert('Connection error.');
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    async function resetPassword() {
+      const email = document.getElementById('fp-email').value.trim();
+      const otp = document.getElementById('fp-otp').value.trim();
+      const newPassword = document.getElementById('fp-new-pass').value.trim();
+      
+      if (!otp || !newPassword) return alert('Please fill in all fields.');
+
+      const btn = event.target;
+      const originalText = btn.innerText;
+      btn.innerText = 'Resetting...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('http://localhost:3005/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, newPassword })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('fp-step-2').style.display = 'none';
+          document.getElementById('fp-step-3').style.display = 'block';
+        } else {
+          alert(data.error || 'Failed to reset password.');
+        }
+      } catch (err) {
+        alert('Connection error.');
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
       }
     }
   </script>

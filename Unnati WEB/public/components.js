@@ -14,16 +14,17 @@
  * ─────────────────────────────────────────────
  */
 
-const PROJECTS = [
-  { id: 'PROJ-1', name: 'Pipeline Segment 1' },
-  { id: 'PROJ-2', name: 'Digboi Expansion' },
-  { id: 'PROJ-3', name: 'Numaligarh Bio-Refinery' }
-];
+const PROJECTS = [];
 
 function renderSharedComponents(activePage = '') {
   const userRole = localStorage.getItem('userRole') || 'admin';
   const selectedProjectId = localStorage.getItem('selectedProjectId') || 'PROJ-1';
   const loggedInUser = localStorage.getItem('username') || 'oil-admin';
+
+  // Get available projects first
+  const assignedProjects = JSON.parse(localStorage.getItem('assignedProjects') || '[]');
+  const allowedProjects = PROJECTS.filter(p => userRole === 'admin' || assignedProjects.includes(p.id));
+  const activeProj = allowedProjects[0] || PROJECTS[0] || { name: 'No Active Project' };
 
   // Determine footer metadata
   let profileName = "Oil India Admin";
@@ -40,7 +41,7 @@ function renderSharedComponents(activePage = '') {
       profileName = "Amit Gohain";
       profileRole = "Bio-Refinery Manager";
     } else {
-      profileName = "Project Manager";
+      profileName = activeProj.name !== 'No Active Project' ? activeProj.name : "Project Overview";
       profileRole = "Site Manager";
     }
   }
@@ -55,7 +56,9 @@ function renderSharedComponents(activePage = '') {
       { key: 'schedule',      icon: 'fa-calendar-days',     label: 'Schedule',        href: 'schedule.html' },
       { key: 'agent',         icon: 'fa-brain',             label: 'AI Assistant',    href: 'agent.html' },
       { key: 'plan',          icon: 'fa-pen-to-square',     label: 'Project Planner', href: 'plan.html' },
-      { key: 'analytics',     icon: 'fa-chart-bar',         label: 'Site Analytics',  href: 'analytics.html' }
+      { key: 'analytics',     icon: 'fa-chart-bar',         label: 'Site Analytics',  href: 'analytics.html' },
+      { key: 'add-workers',   icon: 'fa-user-plus',         label: 'Add Workers',     href: 'add-workers.html' },
+      { key: 'settings',      icon: 'fa-gear',              label: 'Settings',        href: 'settings.html' }
     ];
   } else {
     itemsToShow = [
@@ -68,7 +71,8 @@ function renderSharedComponents(activePage = '') {
       { key: 'analytics',     icon: 'fa-chart-bar',         label: 'Analytics',       href: 'analytics.html' },
       { key: 'memory',        icon: 'fa-microchip',         label: 'Project Memory',  href: 'memory.html' },
       { key: 'audit',         icon: 'fa-clock-rotate-left', label: 'Audit Trail',     href: 'audit.html' },
-      { key: 'settings',      icon: 'fa-gear',              label: 'Settings',        href: 'settings.html' }
+      { key: 'settings',      icon: 'fa-gear',              label: 'Settings',        href: 'settings.html' },
+      { key: 'new-project',   icon: 'fa-plus',              label: 'New Project',     href: 'new-project.html' }
     ];
   }
 
@@ -98,8 +102,6 @@ function renderSharedComponents(activePage = '') {
   // ── 2. MAIN HEADER ───────────────────────────────────────────────
   // Project Display / Selector
   let projectHeaderControl = '';
-  const assignedProjects = JSON.parse(localStorage.getItem('assignedProjects') || '[]');
-  const allowedProjects = PROJECTS.filter(p => userRole === 'admin' || assignedProjects.includes(p.id));
 
   if (userRole === 'admin') {
     const options = [
@@ -108,7 +110,7 @@ function renderSharedComponents(activePage = '') {
     ].join('');
     projectHeaderControl = `
       <div class="project-selector-container me-3" style="display:inline-flex; align-items:center; gap:8px;">
-        <label style="font-size:10.5px; font-weight:700; color:#64748B; text-transform:uppercase; margin:0; letter-spacing:0.5px;">Project View:</label>
+        <label style="font-size:10.5px; font-weight:700; color:#64748B; text-transform:uppercase; margin:0; letter-spacing:0.5px; white-space: nowrap;">Project View:</label>
         <select class="form-select form-select-sm" id="globalProjectSelector" style="font-size:12.5px; font-weight:600; color:#1E293B; border-radius:6px; border:1px solid #CBD5E1; padding:4px 30px 4px 10px; background:#FFF; cursor:pointer;" onchange="handleProjectChange(this.value)">
           ${options}
         </select>
@@ -117,19 +119,14 @@ function renderSharedComponents(activePage = '') {
     const options = allowedProjects.map(p => `<option value="${p.id}"${p.id === selectedProjectId ? ' selected' : ''}>${p.name}</option>`).join('');
     projectHeaderControl = `
       <div class="project-selector-container me-3" style="display:inline-flex; align-items:center; gap:8px;">
-        <label style="font-size:10.5px; font-weight:700; color:#64748B; text-transform:uppercase; margin:0; letter-spacing:0.5px;">Project View:</label>
+        <label style="font-size:10.5px; font-weight:700; color:#64748B; text-transform:uppercase; margin:0; letter-spacing:0.5px; white-space: nowrap;">Project View:</label>
         <select class="form-select form-select-sm" id="globalProjectSelector" style="font-size:12.5px; font-weight:600; color:#1E293B; border-radius:6px; border:1px solid #CBD5E1; padding:4px 30px 4px 10px; background:#FFF; cursor:pointer;" onchange="handleProjectChange(this.value)">
           ${options}
         </select>
       </div>`;
   } else {
-    const activeProj = allowedProjects[0] || PROJECTS[0];
-    projectHeaderControl = `
-      <div class="project-display-container me-3" style="display:inline-flex; align-items:center;">
-        <span style="font-size:11.5px; font-weight:700; background:#FFF7ED; color:var(--gov-primary); border:1px solid #FFEDD5; padding:4px 12px; border-radius:20px; letter-spacing:0.3px;">
-          <i class="fa-solid fa-folder-open me-1"></i> Project: ${activeProj.name}
-        </span>
-      </div>`;
+    // Hide the project badge from header for managers (unless admin)
+    projectHeaderControl = '';
   }
 
   const header = `

@@ -88,6 +88,9 @@ import com.example.ui.theme.UxSurfaceBright
 import com.example.ui.theme.UxWhite
 import com.example.viewmodel.TimeAgentViewModel
 
+import java.io.File
+import android.util.Log
+
 @Composable
 fun HomeScreen(
     viewModel: TimeAgentViewModel,
@@ -108,6 +111,44 @@ fun HomeScreen(
     val pendingRecording by viewModel.pendingRecordingResult.collectAsState()
     val isPreviewPlaying by viewModel.isPreviewPlaying.collectAsState()
     val previewProgress by viewModel.previewProgress.collectAsState()
+    val capturedPhotoFile by viewModel.capturedPhotoFile.collectAsState()
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            val file = File(context.cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+            try {
+                file.outputStream().use { out ->
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+                }
+                viewModel.setCapturedPhotoFile(file)
+            } catch (e: Exception) {
+                Log.e("HomeScreen", "Error saving photo bitmap", e)
+            }
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch(null)
+        }
+    }
+
+    val takePhoto = {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            cameraLauncher.launch(null)
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -144,6 +185,9 @@ fun HomeScreen(
             recordingResult = result,
             isPlaying = isPreviewPlaying,
             playbackProgress = previewProgress,
+            photoFile = capturedPhotoFile,
+            onTakePhoto = takePhoto,
+            onRemovePhoto = { viewModel.setCapturedPhotoFile(null) },
             onTogglePlay = { viewModel.togglePreviewPlayback() },
             onConfirmSubmit = {
                 viewModel.confirmAndSubmitRecording {

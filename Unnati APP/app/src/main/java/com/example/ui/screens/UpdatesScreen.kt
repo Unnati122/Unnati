@@ -83,6 +83,8 @@ import com.example.ui.theme.UxSurfaceLowest
 import com.example.ui.theme.UxTextMuted
 import com.example.ui.theme.UxTextSecondary
 import com.example.viewmodel.TimeAgentViewModel
+import coil.compose.AsyncImage
+import com.example.data.network.RetrofitClient
 
 @Composable
 fun UpdatesScreen(
@@ -404,13 +406,29 @@ fun VoiceUpdateCard(
                 )
             }
 
-            // Transcript Body
             Text(
                 text = update.transcript,
                 fontSize = 13.sp,
                 color = Color(0xFF2E3132),
                 lineHeight = 18.sp
             )
+
+            // Display site progress photo if available
+            if (!update.photoFilePath.isNullOrBlank()) {
+                val base = RetrofitClient.baseUrl.removeSuffix("/")
+                val path = update.photoFilePath.removePrefix("/")
+                val imageUrl = "$base/$path"
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Site progress photo",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            }
 
             // Audio Player Bar
             Row(
